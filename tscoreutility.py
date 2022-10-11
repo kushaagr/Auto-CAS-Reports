@@ -1,4 +1,6 @@
+import config
 import csv
+import os
 import openpyxl as op
 import matplotlib.pyplot as plt
 from dirutility import create_dir
@@ -14,7 +16,14 @@ def Parse_Csv_To_List(path):
 def Parse_Excel_To_List(path):
     
     WorkBook = op.load_workbook(path)       #WorkBook in which data is available
-    Sheet = WorkBook["Raw Data"]            #Perticular Sheet in Workbook
+    try:
+        Sheet = WorkBook["Raw Data"]          #Particular Sheet in Workbook
+    except KeyError as kerr:
+        Sheet = WorkBook.active               #Last sheet found in excel        
+    except Exception as e:
+        print(f"Exception, at line {e.__traceback__.tb_lineno},",  *e.args)
+        print(e.__traceback__.tb_frame, "\n")
+        return []
 
     Total_rows = Sheet.max_row              #Total no. of rows in Sheet
     Total_clms = Sheet.max_column           #Total no. of coloms in Sheet
@@ -58,7 +67,7 @@ def T_Scores(Name,value):
     # then return d[Name][value]
 
     # Reason: The whole dictionary then could be shifted to global scope and so when 
-    #   main program run the dictionary would be defined once instead of getting defined
+    #   main program runs, the dictionary would be defined once instead of getting defined
     #   every time this function is called
     if Name=="AN":
         d={ 12:30 ,13:34 ,14:38 ,15:40 ,16:43 ,17:44 ,18:46 ,19:48 ,20:49 ,21:51 ,22:52 ,23:53 ,24:54 ,25:56 ,26:57 ,27:58 ,28:59 ,29:60 ,30:61 ,31:62 ,32:63 ,33:64 ,34:65 ,35:66 ,36:67 ,37:68 ,38:69 ,39:70 ,40:71 ,41:72 ,42:73 ,43:74 ,44:75 ,45:77 ,46:78 ,47:78 ,48:80  }
@@ -108,6 +117,13 @@ def Tscores_And_Students_ImpData(RawData):
 
     T_Scores_Of_All_Students = [['T-AN','T-DP','T-SI','T-SA','T-SE','T-IP','T-FP','T-AP','T-CP']]
     for i in range(1,Total_rows):
+        """
+        This code could be simplified using list comprehension and sum() function 
+            AN = sum( [RawData[i][num] for num in range(14, 114, 9)] )
+            DP = sum( [RawData[i][num] for num in range(16, 116, 9)] )
+            SI = sum( ... )
+            ...
+        """
         temp = []
         AN = RawData[i][14]+RawData[i][23]+RawData[i][32]+RawData[i][41]+RawData[i][50]+RawData[i][59]+RawData[i][68]+RawData[i][77]+RawData[i][86]+RawData[i][95]+RawData[i][104]+RawData[i][113]   
         temp.append(T_Scores("AN",AN))
@@ -148,9 +164,10 @@ def Graph_Of_Tscores(Y_Axis_tscore, Student_Data, i, directory_path):
     for k in range(len(X_Axis_Names)):
         plt.text(k,Y_Axis_tscore[k],Y_Axis_tscore[k],ha='center',va="bottom")   #For Adding value in line 
         
-    plt.savefig(directory_path + '/' + Student_Data[i][0] + str(i) + ".png",bbox_inches="tight")
-
     Graph_Name = Student_Data[i][0] + str(i) + ".png"
+    # plt.savefig(directory_path + '/' + Student_Data[i][0] + str(i) + ".png",bbox_inches="tight")
+    plt.savefig(os.path.join(directory_path, Graph_Name), bbox_inches="tight")
+
     return Graph_Name
 
 
@@ -161,7 +178,8 @@ def Plot_Graphs(TScores, Student_Data):
     # Instead of list, a mapping of student-name to graph-image-path is more convenient and secure.
     # List_Of_Graphs = []
     Graphs = {}
-    folder = create_dir('temp')
+    # folder = create_dir('temp')
+    folder = create_dir(config.TEMPDIR)
     for i in range(1,Total_rows):
         Y_Axis_tscore = []
         for j in range(0,Total_cols):
@@ -176,6 +194,7 @@ def Plot_Graphs(TScores, Student_Data):
 if __name__ == '__main__':
     from pprint import pprint
     FILE = 'cas-copy.xlsx'
+    FILE = '1-record-cas-sheet.xlsx'
     data = Parse_Excel_To_List(FILE)
     # pprint(data)
     tscdata, studata = Tscores_And_Students_ImpData(data)
