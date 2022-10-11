@@ -762,7 +762,8 @@ if __name__ == '__main__':
     tree.rowconfigure(0, weight=1)
     tree.grid(column=3, row=1, rowspa=13, columns=4, sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
     
-    ogfilename = tk.StringVar('')
+    ogfilename = tk.StringVar()
+    ogfilename.set('')
 
     label_associatedfile = tk.Label(rootwindow, textvariable=ogfilename, anchor='w')
     label_sortby    = tk.Label(rootwindow, text="Sort by:", anchor='w')
