@@ -14,13 +14,31 @@ def Parse_Csv_To_List(path):
 
 
 def Parse_Excel_To_List(path):
-    
+    """ 
+        Parse a given excel sheet and return list. 
+        The data to be parsed should be either in first sheet of excel file or 
+        sheet should be named 'Raw Data' (case insensitive).
+    """
     WorkBook = op.load_workbook(path)       #WorkBook in which data is available
+    DEFAULT_SHEET = "Raw Data"
     try:
-        Sheet = WorkBook["Raw Data"]          #Particular Sheet in Workbook
+        Sheet = WorkBook[DEFAULT_SHEET]          #Particular Sheet in Workbook
     except KeyError as kerr:
-        Sheet = WorkBook.active               #Last sheet found in excel        
+        # There is a possiblity that excel file contains 'Raw data' sheet but
+        # the letters could be in uppercase or lowercase and cause a mismatch
+        DEFAULT_SHEET = DEFAULT_SHEET.lower()
+        for sheet in WorkBook.sheetnames:
+            if DEFAULT_SHEET == sheet.lower():
+                Sheet = sheet
+                break
+        else:
+        # if for-loop doesn't break then it means there was no Raw data sheet in
+        # excel file and thus as backup we select the first sheet
+            FIRST_SHEET = WorkBook.sheetnames[0]
+            Sheet = WorkBook[FIRST_SHEET]
+            # Sheet = WorkBook.active               #Last sheet found in excel        
     except Exception as e:
+        # Unknown/Unexpected error occurred.
         print(f"Exception, at line {e.__traceback__.tb_lineno},",  *e.args)
         print(e.__traceback__.tb_frame, "\n")
         return []
