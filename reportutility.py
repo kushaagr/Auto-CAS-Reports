@@ -2,6 +2,8 @@ import pathlib
 import random
 import string
 import sqlite3
+import config
+import os
 import openpyxl as op
 import recommendations as reco
 from fpdf import FPDF
@@ -14,7 +16,8 @@ __CONSONANTS  = tuple(set(string.ascii_lowercase) - set(__VOWELS))
 __DEF_FSIZE   = 12
 __PG_WIDTH    = 210 #mm
 __PG_HEIGHT   = 297 #mm
-__GRAPHS_DIR  = './temp'
+# __GRAPHS_DIR  = './temp'
+__GRAPHS_DIR  = config.TEMPDIR
 __IMGDIR  = './images'
 __IMGS    = ('report-newpage-1.png', 'report-newpage-2.png', 'report-newpage-3.png',
         'report-newpage-4.png', 'report-newpage-5.png', 'report-newpage-6.png')
@@ -122,7 +125,7 @@ def plot_col_table(pdfobj, col: list, xpos: int, ypos: int = None):
 def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list, survey_id: int) -> str:
     requiredlen = 8
 
-    con1 = sqlite3.connect('entries.db')
+    con1 = sqlite3.connect(config.DB)
     cur = con1.cursor()
     cur.execute("""SELECT student_name, student_codename FROM tblSurveyReports 
         WHERE survey_id=?""", (survey_id, ))
@@ -263,15 +266,18 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
 
         # outfile_name = f"{gi}-{stu}.pdf"
         outfile_name = f"{gi}-{codename}.pdf"
-        pdfile.output(f"{dirpath}/{outfile_name}")
+        # pdfile.output(f"{dirpath}/{outfile_name}")
+        pdfile.output(os.path.join(dirpath,outfile_name))
         
         # TODO: Delete records when 'regenerating reports' and then insert
         #   but keep the old codename
         con1.commit()
         # SURVEY_ID, STU_NAME, EMAIL, GUARDIAN, AGE, GENDER, MOBILE, INSTITUTE, STREAM, YEAR, MONTHLY_FAMILY_INCOME, FILE, CODENAME
-        cur.execute("""INSERT INTO tblSurveyReports(survey_id, student_codename, student_name, email, guardian_name, age, gender, mobile_number, institute, stream, year, monthly_family_income, report_file)
-            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (survey_id, codename, *data[gi], outfile_name))
+        cur.execute("""INSERT INTO tblSurveyReports(survey_id, student_codename, 
+            student_name, email, guardian_name, age, gender, mobile_number, 
+            institute, stream, year, monthly_family_income, tot_problem_areas,
+            problem_areas, report_file) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (survey_id, codename, *data[gi], len(problemareas),', '.join(problemareas), outfile_name))
         con1.commit()
     con1.close()
     clean_up(__GRAPHS_DIR)

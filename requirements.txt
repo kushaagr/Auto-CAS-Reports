@@ -1,0 +1,8 @@
+python-dateutil
+fpdf2
+openpyxl
+tk
+matplotlib
+matplotlib-inline
+Pillow
+uuid
