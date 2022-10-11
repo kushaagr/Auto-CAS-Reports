@@ -61,21 +61,21 @@ def Parse_Excel_To_List(path):
 def Scores(value,clmNo):
     if clmNo==20 or clmNo==29 or clmNo==33 or clmNo==38 or clmNo==47 or clmNo==52 or clmNo==58 or clmNo==65 or clmNo==84 or clmNo==101:
        d={
-        'FALSE':4,
-        'False':4,
-        'Slightly True':3,
-        'Mainly True':2,
-        'Very True':1
+        #'FALSE':4,
+        'false':4,
+        'slightly true':3,
+        'mainly true':2,
+        'very true':1
          } 
     else:
         d={
-        'FALSE':1,
-        'False':1,
-        'Slightly True':2,
-        'Mainly True':3,
-        'Very True':4
+        #'FALSE':1,
+        'false':1,
+        'slightly true':2,
+        'mainly true':3,
+        'very true':4
          }     
-    return d.get(value,value)
+    return d.get(value.strip().lower(), value)
 
 
 def T_Scores(Name,value):
