@@ -11,11 +11,6 @@ on data provided.
 The data could be provided either in form of excel sheet (first sheet should contain the data) or csv.
 A row must contain students' response and columns identify the survey questions or fields.
 
-Developed by:
-
-Ashutosh Dubey      (IMCA 2021 batch)
-Durva Shinde        (IMCA 2021 batch)
-Kushagra Mehrotra   (IMCA 2019 batch)
 
 ## Application input
 
@@ -40,3 +35,9 @@ Required an excel or csv file where columns should be:
 * followed by 108 columns of questions defined by CAS ..
 
 ---
+
+## Contributors:
+
+* Ashutosh Dubey      (IMCA 2021 batch)
+* Durva Shinde        (IMCA 2021 batch)
+* Kushagra Mehrotra   (IMCA 2019 batch)
