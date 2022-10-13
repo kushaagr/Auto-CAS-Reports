@@ -1,3 +1,5 @@
+import heapq
+import collections as coll
 import pathlib
 import random
 import string
@@ -66,12 +68,13 @@ def Upload_Summary(dirpath: str, tscores: list, studata: list, codenames: list):
     wb.save(f"{dirpath}/summary.xlsx")
 
 
-def plot_two_col_table(pdfobj, col1: list, col2: list):
-    pdfobj.ln(40)
+def plot_tscores(pdfobj, col1: list, col2: list, topproblemareas: list):
     M = 8
+    LIGHTBLUE = (224, 235, 255)
+    pdfobj.ln(40)
     pdfobj.set_left_margin(M)
     pdfobj.set_right_margin(M)
-    pdfobj.set_fill_color(224, 235, 255)
+    pdfobj.set_fill_color(*LIGHTBLUE)
     # pdfobj.set_text_color(0)
 
     pdfobj.cell(100,9, txt=col1[0], align='C', border=1)
@@ -80,15 +83,35 @@ def plot_two_col_table(pdfobj, col1: list, col2: list):
 
     fill = True
     for category, score in zip(col1[1:], col2[1:]):
+        if (category in topproblemareas):
+            fill = True
+            pdfobj.set_font(style="B")
+            # pdfobj.set_fill_color(187, 104, 101)
+            # pdfobj.set_fill_color(222, 140, 51)
+            # pdfobj.set_fill_color(171, 107, 39)
+            # pdfobj.set_fill_color(220, 218, 131)
+            # pdfobj.set_fill_color(169, 167, 100)
+            pdfobj.set_fill_color(171, 107, 39)
+            # pdfobj.set_fill_color(118, 136, 220)
+            # pdfobj.set_fill_color(220, 136, 118)
+
+            pdfobj.set_text_color(255)
+        else:
+            # pdfobj.set_fill_color(224, 235, 255)
+            pdfobj.set_font(style="")
+            pdfobj.set_fill_color(*LIGHTBLUE)
+            pdfobj.set_text_color(0)
+
         pdfobj.cell(100,8, txt=category, border=1, fill=fill)
         pdfobj.cell(0,8, txt=str(score), align='C', border=1, fill=fill)
         pdfobj.ln()
         fill = not fill
-
+    pdfobj.set_font(style="")
+    pdfobj.set_text_color(0)
     pdfobj.set_margins(0, 0, 0)
 
 
-def plot_col_table(pdfobj, col: list, xpos: int, ypos: int = None):
+def plot_problem_areas(pdfobj, col: list, xpos: int, ypos: int = None):
     width = 60
     pdfobj.set_font_size(20)
     # pdfobj.set_left_margin(7)
@@ -129,6 +152,7 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
     cur = con1.cursor()
     cur.execute("""SELECT student_name, student_codename FROM tblSurveyReports 
         WHERE survey_id=?""", (survey_id, ))
+    # con.commit()
     name_codename_map = {}
     rows = cur.fetchall()
     # print(cur.fetchall())
@@ -142,11 +166,21 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
         (str(survey_id), ))
     for gi, stu in enumerate(graphs, start=1):
 
-        # tscores         = ['Score', 71,70,67,56,67,23,45,56]
+        # tscores       = ['Score', 71,70,67,56,67,23,45,56]
         tscores         = ['Score'] + tscoreslist[gi]
-        # problemareas    = ['Anxiety','Depression','Suicidal Ideation','Interpersonalproblems']
-        problemareas    = [reco.CATEGORIES[1:][j] 
-                            for j, t in enumerate(tscores[1:], start=0) if int(t) >= 65]
+        # problemareas  = ['Anxiety','Depression','Suicidal Ideation','Interpersonalproblems']
+        # problemareas  = [reco.CATEGORIES[1:][j] 
+        #                 for j, t in enumerate(tscores[1:], start=0) if int(t) >= 65]
+        top4tscores     = heapq.nlargest(4, tscoreslist[gi])
+        top4count       = coll.Counter(top4tscores)
+        # problemareas  = [reco.CATEGORIES[1:][j] 
+        problemareas    = []
+        for j, t in enumerate(tscores[1:], start=0):
+            if top4count.get(t, 0) > 0 and t >= 65:
+                top4count[t] -= 1
+                problemareas.append(reco.CATEGORIES[1:][j])                                    
+            elif (int(t) >= 70):
+                problemareas.append(reco.CATEGORIES[1:][j])
 
         # TODO: Delete records when 'regenerating reports' and then insert
         #   but keep the old codename
@@ -164,6 +198,8 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
         pdfile = FPDF()
         # pdfile.set_font('Arial')
         pdfile.set_font('Helvetica')
+        # pdfile.set_font('Lucida Sans Unicode')
+        # pdfile.set_font('Symbol')
         pdfile.set_margins(0, 0, 0)
 
         for i, imgfile in enumerate(__IMGS, start=1):
@@ -171,10 +207,12 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
             pdfile.image(f'{__IMGDIR}/{imgfile}', 0, 0, w=__PG_WIDTH)
             # Page 1
             if i == 1:
+                stname = data[gi][0]
                 pdfile.ln(230)
                 pdfile.set_x(8)
                 pdfile.set_font_size(25)
-                pdfile.cell(100, 10, codename, border=0)
+                # pdfile.cell(100, 10, codename, border=0)
+                pdfile.cell(100, 10, stname, border=0)
                 pdfile.set_font_size(__DEF_FSIZE)
             # Page 4
             elif i == 4:
@@ -182,12 +220,13 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
                 #     'Substance Abuse (SA)', 'Self-esteem Problems (SE)', 'Interpersonal Problems (IP)',
                 #     'Family Problems (FP)', 'Academic Problems (AP)','Career Problems (CP)']
                 
-                plot_two_col_table(pdfile, reco.CATEGORIES, tscores)
+                plot_tscores(pdfile, reco.CATEGORIES, tscores, problemareas)
                 # pdfile.set_y(150)
                 # pdfile.ln(150)
-                plot_col_table(pdfile, problemareas, 148, 30)
+                # plot_problem_areas(pdfile, problemareas, 148, 30)
                 # pdfile.image(f'{__GRAPHS_DIR}/{graphs[stu]}', 7, 130, w=140, h=120)
-                pdfile.image(f'{__GRAPHS_DIR}/{graphs[stu]}', 7, 128, w=138, h=120)
+                # pdfile.image(f'{__GRAPHS_DIR}/{graphs[stu]}', 7, 128, w=138, h=120)
+                pdfile.image(f'{__GRAPHS_DIR}/{graphs[stu]}', 18, 128, h=120)
             # Page 5
                 _ = """ Useless code here
             elif i == 5:
@@ -222,6 +261,8 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
                 # for ii, keys in enumerate(problemareas[1:]):
                 for ii, keys in enumerate(problemareas[:]):
                     for j, recommend in enumerate(reco.crpair[keys]):
+                        # recommend = "` " + recommend
+                        # recommend = "~ " + recommend
                         advice = recommend.encode('utf-8').decode('iso-8859-1')
                         # pdfile.write(txt="SAMPLE TEXT SAMPLE TEXT SAMPLETEAKJLDSFLKAJDSF; JADLFKJALKS;JFL;AKJDFLKAJ;FKLAJDSFKL;JADLSF")
 
@@ -234,7 +275,15 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, graphs: list
                             pdfile.add_page()
                             pdfile.image(f'{__IMGDIR}/{TEMPLATE_WITH_CONTACT}', 0, 0, w=__PG_WIDTH)
                             pdfile.set_y(35)
-                        pdfile.write(txt="\n"+advice)
+                        pdfile.set_font(style="B")
+                        # pdfile.write(txt="\n" + advice)
+                        pdfile.write(txt="\n~ ") 
+                        # pdfile.write(txt="\n. ")
+                        # pdfile.write(txt="\no ")
+                        # pdfile.write(txt="\nO ")
+                        pdfile.set_font(style="")
+                        pdfile.write(txt=advice)
+                        # pdfile.write(txt="\n\u2022 " + advice)
                         # pdfile.write(h=__DEF_FSIZE, txt=advice)
                         # pdfile.write(h=8, txt="\n"+advice)
                         pdfile.ln()
