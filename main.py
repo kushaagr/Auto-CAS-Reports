@@ -1,19 +1,18 @@
+import config
+import departmentdata as college
+import tscoreutility as tsc
+import dirutility as dutil
+import reportutility as rutil
 
 import os
 import subprocess
-from datetime import datetime
-
-# """!SAVED"""
 import openpyxl
 import sqlite3
 import pathlib
 import shutil
-import config
 import tkinter as tk
-import tscoreutility as tsc
-import dirutility as dutil
-import reportutility as rutil
 from pprint import pprint
+from datetime import datetime
 from dateutil import parser
 from tkinter import ttk
 from tkinter import filedialog, messagebox
@@ -293,7 +292,7 @@ def Upload_Action():
         input_filename.get(),
         given_timestamp,
         pick_institute.get().strip(), 
-        input_department.get().strip(),
+        pick_institute.get().strip(),
         rawfilename,
         rawfilename, # This field value will be modified in Upload_Report() function, so we need two of these
         datetime.now()
@@ -586,6 +585,13 @@ def openSubprocess(e=None):
     return sts
 
 
+def updateDeptBox(e=None):
+    insti = pick_institute.get()
+    pick_department['values']=college.INST_DEPT_MAP[insti]
+    pick_department.current(0)
+    pass
+
+
 if __name__ == '__main__':
     """
     TODOs
@@ -651,7 +657,9 @@ if __name__ == '__main__':
     # frame_datetime = ttk.LabelFrame(rootwindow, text="Select date of survey*")
     frame_datetime = tk.Frame(rootwindow, width=FIELD_SIZE)
 
-    institute_values = ('...', 'AITR', 'AIMSR', 'AIPER', 'AFMR')
+    # institute_values = ('AITR', 'AIMSR', 'AIPER', 'AFMR', 'FCA', 'AIL', 'AID')
+    institute_values = college.institutes
+    department_value = college.INST_DEPT_MAP.get(institute_values[0], ('',))
     sort_keys = ('Upload Time (Default)', 'Survey Name', 'Survey Time',
                         'Institute', 'Department')
     db_fields   = ('upload_time', 'survey_name', 'survey_time', 'institute', 'department')
@@ -679,7 +687,9 @@ if __name__ == '__main__':
     input_time      = tk.Entry(label_time, textvariable=timevalue)
     pick_institute  = ttk.Combobox(rootwindow, width=FIELD_SIZE-3,
         text="Institute", values=institute_values, state='readonly')
-    input_department= tk.Entry(rootwindow, width=FIELD_SIZE)
+    # input_department= tk.Entry(rootwindow, width=FIELD_SIZE)
+    pick_department = ttk.Combobox(rootwindow, width=FIELD_SIZE-3, 
+        text="Department", values=department_value, state='readonly')
     
     button_browse   = tk.Button(rootwindow,
                         text = "Browse",
@@ -722,7 +732,9 @@ if __name__ == '__main__':
     pick_institute.current(0)
 
     label_department.grid(column=0, row=12, pady=(PY,0), sticky=tk.W+tk.E)
-    input_department.grid(column=0, row=13, sticky=tk.W+tk.E)
+    pick_department.grid(column=0, row=13, sticky=tk.W+tk.E)
+    pick_department.current(0)
+    # input_department.grid(column=0, row=13, sticky=tk.W+tk.E)
     # input_filepath.configure(width=FIELD_SIZE)
     # input_filepath.insert(0, "Provide an input file")
     input_filepath.insert(0, "")
@@ -821,6 +833,7 @@ if __name__ == '__main__':
     # input_filter.bind('<Escape>', Clear_filter)
     # pick_order.bind("<FocusIn>", updateView)
     pick_order.bind("<<ComboboxSelected>>", updateView)
+    pick_institute.bind("<<ComboboxSelected>>", updateDeptBox)
 
     # bf = Create_Busy_Frame(rootwindow)
     # bf.update()
@@ -835,6 +848,7 @@ if __name__ == '__main__':
     #         datetime.now()
     #     ]
     #     Upload_Report(testinp)
+    updateDeptBox()
     updateView()
     rootwindow.mainloop()
     # con.commit()
