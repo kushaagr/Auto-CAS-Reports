@@ -30,6 +30,8 @@ DATERANGE   = tuple(range(1, 32))
 MONTHRANGE  = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
                 'Sep', 'Oct', 'Nov', 'Dec')
 YEARRANGE   = tuple(range(datetime.now().year, 1999, -1))
+MIXED       = "MIXED"
+COMBINED    = "COMBINED"
 
 
 
@@ -156,8 +158,10 @@ def Perform_File_Operations(data_sheet: str, survey_id: int):
     # print(graphs)
     reportsdir = dutil.create_report_folder(data_sheet)
     codednames = rutil.generate_codenames_list(studata)
+    # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     rutil.Upload_Summary(reportsdir, tscdata, studata, codednames)
     rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id)
+    # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')
 
 
@@ -292,7 +296,7 @@ def Upload_Action():
         input_filename.get(),
         given_timestamp,
         pick_institute.get().strip(), 
-        pick_institute.get().strip(),
+        pick_department.get().strip(),
         rawfilename,
         rawfilename, # This field value will be modified in Upload_Report() function, so we need two of these
         datetime.now()
@@ -587,7 +591,7 @@ def openSubprocess(e=None):
 
 def updateDeptBox(e=None):
     insti = pick_institute.get()
-    pick_department['values']=college.INST_DEPT_MAP[insti]
+    pick_department['values']=college.INST_DEPT_MAP.get(insti, (COMBINED, ))
     pick_department.current(0)
     pass
 
@@ -659,7 +663,7 @@ if __name__ == '__main__':
 
     # institute_values = ('AITR', 'AIMSR', 'AIPER', 'AFMR', 'FCA', 'AIL', 'AID')
     institute_values = college.institutes
-    department_value = college.INST_DEPT_MAP.get(institute_values[0], ('',))
+    department_value = college.INST_DEPT_MAP.get(institute_values[0], (COMBINED,))
     sort_keys = ('Upload Time (Default)', 'Survey Name', 'Survey Time',
                         'Institute', 'Department')
     db_fields   = ('upload_time', 'survey_name', 'survey_time', 'institute', 'department')
