@@ -151,7 +151,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int):
     else:
         # Unrecognized file format
         return
-    tscdata, studata = tsc.Tscores_And_Students_ImpData(data)
+    tscdata, studata, AllQuestions = tsc.Tscores_And_Students_ImpData(data)
     # pprint(studata) 
     # graphs = {'abcd': 'abcd1.png', 'nmn': 'nmn2.png', 'vxz': 'vxz3.png', 'efg': 'efg4.png', 'fgh': 'fgh5.png', 'hui': 'hui6.png', 'tkiof': 'tkiof7.png'}
     graphs = tsc.Plot_Graphs(tscdata, studata)
@@ -159,7 +159,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int):
     reportsdir = dutil.create_report_folder(data_sheet)
     codednames = rutil.generate_codenames_list(studata)
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
-    rutil.Upload_Summary(reportsdir, tscdata, studata, codednames)
+    rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, AllQuestions)
     rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id)
     # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')

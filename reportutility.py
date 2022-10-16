@@ -101,19 +101,20 @@ def generate_codenames_list_e1(data: list):
 
 
 def Upload_Summary(dirpath: str, tscores: list, 
-                    studata: list, codenames: list):
+                    studata: list, codenames: list, AllQuestions: list):
     header = ('NAME', 
     'CODE NAME',
     # 'DEMOGRAPHICS (AGE, GENDER, INSTITUTE, STREAM, YEAR, MONTHY FAMILY INCOME)',
     # 'CONTACT DETAILS (EMAIL, MOBILE)',
     *studata[0][1:],
+    *AllQuestions[0][0:],
     'AN-TSCORE', 'DP-TSCORE', 'SI-TSCORE', 'SA-TSCORE', 'SE-TSCORE', 'IP-TSCORE', 'FP-TSCORE', 'AP-TSCORE', 'CP-TSCORE')
     wb = op.Workbook()
     sheet = wb.active
     sheet.append(header)
     for i, cname in enumerate(codenames, start=1):
         name    = studata[i][0]
-        sheet.append((name, cname, *studata[i][1:], *tscores[i]))
+        sheet.append((name, cname, *studata[i][1:], *AllQuestions[i][0:], *tscores[i]))
 
     wb.save(f"{dirpath}/summary.xlsx")
 
