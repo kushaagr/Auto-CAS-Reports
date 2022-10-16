@@ -65,10 +65,14 @@ def enableButtons(a=None):
                 button_generate['text'] = "REGENERATE REPORTS"
                 button_delete['text']  = "DELETE SURVEY"
                 button_downall['state'] = tk.NORMAL
+                button_viewsum['state'] = tk.NORMAL
+                button_savecopy['state'] = tk.NORMAL
             else:
                 button_generate['text'] = "GENERATE REPORTS"
                 button_downall['state'] = tk.DISABLED
                 button_view['state'] = tk.DISABLED
+                button_viewsum['state'] = tk.DISABLED
+                button_savecopy['state'] = tk.DISABLED
         else:
             uploadedfiles = []
             for itemId in tree.selection():
@@ -80,6 +84,8 @@ def enableButtons(a=None):
             button_generate['text'] = "GENERATE ALL"
             button_delete['text']  = "DELETE ALL"
             button_downall['state'] = tk.DISABLED
+            button_viewsum['state'] = tk.DISABLED
+            button_savecopy['state'] = tk.DISABLED
     else:
         disableButtons()
 
@@ -90,6 +96,8 @@ def disableButtons(event=None):
     button_downall.configure(state=tk.DISABLED, text="DOWNLOAD REPORTS")
     button_delete.configure(state=tk.DISABLED, text="DELETE SURVEY")
     button_view.configure(state=tk.DISABLED, text="VIEW REPORTS")
+    button_viewsum.configure(state=tk.DISABLED)
+    button_savecopy.configure(state=tk.DISABLED)
     ogfilename.set('')
 
     for item in tree.selection():
@@ -135,7 +143,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     print(f'{codednames=}')
     rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, AllQuestions ,survey_name)
-    rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id)
+    rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, codednames)
     # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')
 
@@ -244,6 +252,7 @@ def clearInputs():
     input_filepath.configure(state='normal')
     input_filename.delete(0, tk.END)
     input_filepath.delete(0, tk.END)
+    input_time.delete(0, tk.END)
     input_filepath.configure(state='readonly')
 
 
@@ -415,10 +424,10 @@ def View_Reports():
     # TODO: Add a button to View Summary sheet
     # TODO: Add a button to Download Summary sheet
 
-    TIP = "Use mousewheel to scroll vertically, and press SHIFT key with mousewheel to scoll horizontally." + \
-        "\n" + "Use Ctrl+Leftclick to select items.\n" +\
-        "Use Shift+Leftclick to select multiple items in sequence." +\
-        "\n\n" + "**If files in selected folder have same name as download files then files in that folder will be overwritten"
+    TIP = "Use mousewheel to scroll vertically, and use MouseWheel with SHIFT key to scoll horizontally." + \
+        "\n" + "Hold CTRL and Left-click to select items.\n" +\
+        "Use SHIFT+Leftclick to select multiple items in sequence." +\
+        "\n\n" + "Note: If files in selected folder have same name as download files then these files will overwrite them."
         # "\n\n" + "*If downloaded files have same name as file in destination folder then those files will be overwritten."
     FIELD_ID    = ('cname', 'totpa', 'sname', 'semail', 'mobile', 'age',
         'gender', 'stream', 'year', 'filename')
@@ -579,6 +588,59 @@ def openSubprocess(e=None):
     return sts
 
 
+def Open_Associated_Summary():
+    treeItemId  = tree.focus()
+    treestorage = tree.item(treeItemId)['values']
+    survey_name = treestorage[0]
+    outputfol   = pathlib.Path(treestorage[-2]).stem
+    reportspath = pathlib.Path(config.REPORTSFOL) / outputfol
+    if (reportspath.exists()):
+        summary_sheet_path = reportspath / rutil.getsummaryname(survey_name)
+        print(f'{summary_sheet_path=}')
+        print(str(summary_sheet_path)) 
+        # subprocess.run(['start', 'excel.exe',f'"{str(summary_sheet_path)}"'], shell=True)
+        subprocess.Popen(f'start excel.exe "{str(summary_sheet_path)}"', shell=True)
+    pass
+
+
+def Copy_Summary():
+    dest    = filedialog.askdirectory(parent=rootwindow,
+                                initialdir='/',
+                                title="Please select a folder:")
+    treedata        = tree.item(tree.focus())['values']
+    selecteditemid  = tree.focus()
+    outputfol       = pathlib.Path(treedata[-2]).stem
+    survey_name     = treedata[0]
+    reportspath = pathlib.Path(config.REPORTSFOL) / outputfol
+    if pathlib.Path(directory:=os.path.join(config.REPORTSFOL, outputfol)).is_dir():
+        file        = rutil.getsummaryname(survey_name)
+        srcpath     = pathlib.Path(directory) / file
+        destpath    = pathlib.Path(dest) / file
+        # srcfile = pathlib.Path(directory) / file
+        
+        # if (pathlib.Path(dest) / file).exists():
+        if destpath.exists():
+            # print("Exists", pathlib.Path(dest) / file, end=" ")
+            # print("Exists", (pathlib.Path(dest) / file).exists())
+            # print("Exists", destpath.exists(), destpath)
+            count = 1
+            while (pathlib.Path(dest) / (file.stem + f" ({count})" + file.suffix)).exists():
+                count += 1
+            shutil.copy2(srcpath, (pathlib.Path(dest) / (file.stem + f" ({count})" + file.suffix)))
+        else:
+            shutil.copy2(srcpath, dest)
+            # shutil.copy2(srcfile, dest)
+        
+        dest = dest.translate({ord('/'):'\\'})
+        print("Summary sheet copies to desination!")
+        print(dest)
+        # messagebox.showinfo("Download complete!", "Download complete!!")
+        answer = messagebox.askyesno("Download complete", "Would you like to open the folder?")
+        if (answer == True):
+            # subprocess.Popen(f"explorer.exe \"{dest}\"", shell=True)
+            subprocess.run(["explorer", dest])
+
+
 def updateDeptBox(e=None):
     insti = pick_institute.get()
     pick_department['values']=college.INST_DEPT_MAP.get(insti, (COMBINED, ))
@@ -587,22 +649,24 @@ def updateDeptBox(e=None):
 
 
 def openinfowindow(parentwindow):
-    infowindow = tk.Toplevel(parentwindow)
     FALLBACK_INFO = """
 Developed by:
 
 * Ashutosh Dubey\t\t(IMCA 2021 batch)
 * Durva Shinde\t\t(IMCA 2021 batch)
-* Kushagra Mehrotra\t(IMCA 2019 batch)
-Student at Acropolis FCA department under guidance of Prof. Nitin Kulkarni.
+* Kushagra Mehrotra\t(IMCA 2019 batch) 
+\t\t\t\t
+Student at Acropolis FCA department under guidance of \t\t
+Prof. Nitin Kulkarni.
 
 For help and assistance email at: 
 kushagramehrotra.ca19@acropolis.in
-    """
+"""
+    infowindow = tk.Toplevel(parentwindow)
     info = FALLBACK_INFO
     label_contributors = tk.Label(infowindow, text=info, justify='left')
     label_contributors.pack(ipadx=PX)
-    pass
+    
 
 
 def createFooter(parentwindow):
@@ -616,23 +680,24 @@ def createFooter(parentwindow):
 
     return button_info, label_madeby
 
+
 if __name__ == '__main__':
     """
     TODOs
-    TODO: Create a date and time drop-down widgets in a separate frame
-    TODO: Replace input_datetime with new dropdown input everywhere.
-    TODO: (BUG) Fix cursor doesn't revert to normal when Generate call finishes.
     TODO: File path should look like "C/users/kusha/Docu...cas-copy.xlsx", also replace foward slash with backslash
     TODO: Add v-scrollbar to treeview
     TODO: Add auto-hide H-scrollbar to treeview
     TODO: (IN THE END) Convert this into an asynchronous program
     TODO: possible pdf-generation speed-up can be achieved by replacing images in pdf with html content
 
-    DONE:  TODO: Add radio button widget for ascending and descending order
-    DONE:  TODO: When reports are generating freeze the main window and create a progress bar pop up
-    DONE:  TODO: (ref. reportutility.py) Delete records when 'regenerating reports' and then insert
-    DONE:  TODO: provide recommendations according to problem areas
-    DONE:  TODO: Code incomplete functions. ie. View_Reports and Delete_Reports
+    DONE:   TODO: (BUG) Fix cursor doesn't revert to normal when Generate call finishes.
+    DONE:   TODO: Replace input_datetime with new dropdown input everywhere.
+    DONE:   TODO: Create a date and time drop-down widgets in a separate frame
+    DONE:   TODO: Add radio button widget for ascending and descending order
+    DONE:   TODO: When reports are generating freeze the main window and create a progress bar pop up
+    DONE:   TODO: (ref. reportutility.py) Delete records when 'regenerating reports' and then insert
+    DONE:   TODO: provide recommendations according to problem areas
+    DONE:   TODO: Code incomplete functions. ie. View_Reports and Delete_Reports
  
     """
 
@@ -694,7 +759,8 @@ if __name__ == '__main__':
     label_filepath  = tk.Label(rootwindow, text="Browse input file*", anchor='w')
     label_filename  = tk.Label(rootwindow, text="Survey name", anchor='w')
     # label_datetime  = tk.Label(frame_datetime, text="Enter date and giventime of survey", anchor='w')
-    label_date      = ttk.LabelFrame(frame_datetime, text="Pick date of survey:*", width=FIELD_SIZE//2)
+    label_date      = ttk.LabelFrame(frame_datetime, text="Pick date of survey:*", 
+                        width=FIELD_SIZE//2)
     label_time      = ttk.LabelFrame(frame_datetime, text="Time of survey (optional):")
     label_institute = tk.Label(rootwindow, text="Institute", anchor='w')
     label_department= tk.Label(rootwindow, text="Department", anchor='w')
@@ -731,40 +797,41 @@ if __name__ == '__main__':
 
     label_filepath.grid(column=0, row=0, pady=(PY,0), sticky=tk.W+tk.E,)
     input_filepath.grid(column=0, row=1, sticky=tk.W+tk.E)
-    button_browse.grid(column=0, row=2, pady = PX, padx=PX , sticky=tk.W+tk.E)
+    button_browse.grid(column=0, row=2, pady = (PX, 0), padx=PX , sticky=tk.W+tk.E)
 
     label_filename.grid(column=0, row=3, pady=(PY,0), sticky=tk.W+tk.E)
     input_filename.grid(column=0, row=4, sticky=tk.W+tk.E)
 
-    frame_datetime.grid(column=0, row=5, rows=2, pady=(PY, 0), sticky=tk.W+tk.E)
+    frame_datetime.grid(column=0, row=5, rows=2, pady=(PY*2, 0), sticky=tk.W+tk.E)
     # label_datetime.grid(column=0, row=6, pady=(PY,0), sticky=tk.W)
     # input_datetime.grid(column=0, row=7, sticky=tk.W)
     # frame_datetime.update()
-    label_date.pack(side='left', expand=1)
-    label_time.pack(side='right', expand=1)
+    label_date.pack(side='left', expand=1, fill='y')
+    label_time.pack(side='right', expand=1, fill='y')
     pick_day.pack(side='left', padx=(PX//2), pady=PY)
     pick_month.pack(side='left', padx=(PX//2), pady=PY)
     pick_year.pack(side='left', padx=(PX//2), pady=PY)
-    input_time.pack(side='top', padx=PX, pady=PY)
+    input_time.pack(side='left', padx=PX, pady=PY)
 
     pick_day.current(0)
     pick_month.current(0)
     pick_year.current(0)
 
-    label_institute.grid(column=0, row=9, pady=(PY,0), sticky=tk.W+tk.E)
-    pick_institute.grid(column=0, row=10, sticky=tk.W+tk.E)
+    label_institute.grid(column=0, row=7, pady=(PY,0), sticky=tk.W+tk.E)
+    pick_institute.grid(column=0, row=8, sticky=tk.W+tk.E)
     pick_institute.current(0)
 
-    label_department.grid(column=0, row=12, pady=(PY,0), sticky=tk.W+tk.E)
-    pick_department.grid(column=0, row=13, sticky=tk.W+tk.E)
+    label_department.grid(column=0, row=9, pady=(PY,0), sticky=tk.W+tk.E)
+    pick_department.grid(column=0, row=10, sticky=tk.W+tk.E)
     pick_department.current(0)
     # input_department.grid(column=0, row=13, sticky=tk.W+tk.E)
     # input_filepath.configure(width=FIELD_SIZE)
     # input_filepath.insert(0, "Provide an input file")
+    button_upload.grid(column=0, row=13, pady = PX, padx=PX , sticky=tk.W+tk.E)
+
+
     input_filepath.insert(0, "")
     input_filepath.configure(state='readonly')
-
-    button_upload.grid(column=0, row=15, pady = PX, padx=PX , sticky=tk.W+tk.E)
     
     # hor_sep = ttk.Separator(rootwindow, orient=tk.VERTICAL)
     # hor_sep.grid(column=1, row=1, sticky=tk.N+tk.S, rowspan=13 )
@@ -797,7 +864,7 @@ if __name__ == '__main__':
     tree.column("date",         stretch=True, minwidth=100, width=150, anchor='center')
     tree.column("uploadtime",   stretch=True, minwidth=100, width=200, anchor='center')
     tree.rowconfigure(0, weight=1)
-    tree.grid(column=3, row=1, rowspa=13, columns=4, sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
+    tree.grid(column=3, row=1, rowspan=14, columns=4, sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
     
     ogfilename = tk.StringVar()
     ogfilename.set('')
@@ -821,6 +888,12 @@ if __name__ == '__main__':
     button_downall  = tk.Button(rootwindow, 
                         text = 'DOWNLOAD REPORTS', state='disabled',
                         command=Copy_All_Reports)
+    button_viewsum  = tk.Button(rootwindow,
+                        text = 'VIEW SUMMARY', state='disabled',
+                        command=Open_Associated_Summary)
+    button_savecopy = tk.Button(rootwindow,
+                        text = 'SAVE A COPY OF \nSUMMARY', state='disabled',
+                        command=Copy_Summary)
     button_clearbox = tk.Button(rootwindow,
                         text = 'clear filter', command=Clear_Filter)
     button_order    = tk.Button(rootwindow,
@@ -830,12 +903,14 @@ if __name__ == '__main__':
     button_view.grid(column=7, row=3, sticky=tk.E+tk.W, padx=PX)
     button_delete.grid(column=7, row=4, sticky=tk.E+tk.W, padx=PX)
     button_downall.grid(column=7, row=5, sticky=tk.E+tk.W, padx=PX)
+    button_viewsum.grid(column=7, row=6, sticky=tk.E+tk.W, padx=PX)
+    button_savecopy.grid(column=7, row=7, sticky=tk.E+tk.W, padx=PX)
 
     label_associatedfile.grid(column=3, row=15, columns=4, sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
-    label_sortby.grid(column=7, row=11, sticky=tk.W, padx=PX)
-    pick_order.grid(column=7, row=12, sticky=tk.W, padx=PX)
+    label_sortby.grid(column=7, row=12, sticky=tk.W, padx=PX)
+    pick_order.grid(column=7, row=13, sticky=tk.W, padx=PX)
     pick_order.current(0)
-    button_order.grid(column=7, row=11, sticky=tk.E, padx=PX, ipadx=PX/2)
+    button_order.grid(column=7, row=12, sticky=tk.E, padx=PX, ipadx=PX/2)
     
     input_filter.grid(column=7, row=1, sticky=tk.E, padx=PX)
     label_filter.grid(column=7, row=1, sticky=tk.W, padx=PX)

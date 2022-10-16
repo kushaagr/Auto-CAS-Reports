@@ -104,6 +104,12 @@ def generate_codenames_list_e1(data: list):
     return codenames
 
 
+def getsummaryname(survey_name: str) -> str:
+    if (survey_name.strip() != ''):
+        return f"Summary - {survey_name}.xlsx"
+    return f"Summary.xlsx"
+
+
 def Upload_Summary(dirpath: str, tscores: list, 
                     studata: list, codenames: list, AllQuestions: list,survey_name: str=''):
     header = ('NAME', 
@@ -120,9 +126,10 @@ def Upload_Summary(dirpath: str, tscores: list,
         name    = studata[gi][0]
         sheet.append((name, cname, *studata[gi][1:],*AllQuestions[gi][0:], *tscores[gi]))
 
-    if (survey_name.strip() != ''):
-        survey_name = f" - {survey_name}"
-    wb.save(f"{dirpath}/Summary{survey_name}.xlsx")
+    wb.save(f"{dirpath}/{getsummaryname(survey_name)}")
+    # if (survey_name.strip() != ''):
+    #     survey_name = f" - {survey_name}"
+    # wb.save(f"{dirpath}/Summary{survey_name}.xlsx")
 
 
 def plot_tscores(pdfobj, col1: list, col2: list, 
@@ -205,7 +212,7 @@ def plot_problem_areas(pdfobj, col: list,
 
 
 def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, 
-                        graphs: list, survey_id: int, 
+                        graphs: list, survey_id: int, codenames: list = None,
                         whichdepartment: str = None) -> str:
 
     con1 = sqlite3.connect(config.DB)
@@ -252,11 +259,14 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list,
         count = 1
         codename = ''
         # codename = generate_codename(data[gi], whichdepartment)
-        codename = generate_codename(data[gi])
-        while (f'{codename}{count:03}' in created_codenames):
-            count += 1
-        codename = f'{codename}{count:03}'
-        created_codenames.add(codename)
+        if (codenames is None):
+            codename = generate_codename(data[gi])
+            while (f'{codename}{count:03}' in created_codenames):
+                count += 1
+            codename = f'{codename}{count:03}'
+            created_codenames.add(codename)
+        else:
+            codename = codenames[gi-1]
 
         pdfile = FPDF()
         pdfile.set_margins(0, 0, 0)
@@ -340,7 +350,10 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list,
 
         # outfile_name = f"{gi}-{stu}.pdf"
         # pdfile.output(f"{dirpath}/{outfile_name}")
-        outfile_name = f"{gi}-{codename}.pdf"
+        if debug_setting:
+            outfile_name = f"{gi}-{codename}.pdf"
+        else:
+            outfile_name = f"{codename}.pdf"
         pdfile.output(os.path.join(dirpath,outfile_name))
         
         con1.commit()
