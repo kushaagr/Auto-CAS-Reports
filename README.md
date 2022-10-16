@@ -10,14 +10,14 @@ on data provided.
 
 ## Downloads
 
-Windows setup for compiled application could be found in releases section [(here)](https://github.com/kushaagr/Auto-CAS-Reports/releases)
+Windows setup for compiled application could be found in releases section [(here)](https://github.com/kushaagr/Auto-CAS-Reports/releases).
   
-The application upon installation can be run from start menu or through desktop shortcut.
+Upon installation the application can be run from start menu or through desktop shortcut.
 
 ## How to run code?
 
 Clone git repo to your local machine:  
-```git
+```
 git clone https://github.com/kushaagr/Auto-CAS-Reports.git
 ```
 
@@ -25,9 +25,7 @@ or
 
 [Download this code as zip](https://github.com/kushaagr/Auto-CAS-Reports/archive/refs/heads/main.zip)  
 
-
 After getting code on your local machine, follow either of the two methods.  
-
 
 ### Method 1:
 1. Click on setup.bat to install all required python libraries.  
@@ -42,6 +40,10 @@ pip install -r requirements.txt
 python main.py
 ```
 
+### Compilation command
+```
+pyinstaller -i ./images/icons8-feather-60.ico -w --noconfirm --add-data "./images/;images" --add-data "./myfonts/;myfonts" main.py
+```
 
 ## Application input
 
