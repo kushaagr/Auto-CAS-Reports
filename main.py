@@ -82,34 +82,7 @@ def enableButtons(a=None):
             button_downall['state'] = tk.DISABLED
     else:
         disableButtons()
-    """
-    if tot_selected_items > 0:
-        button_delete['state'] = tk.NORMAL
-        if pathlib.Path(f'./data/reports/{pathlib.Path(item[-2]).stem}').is_dir():
-            if tot_selected_items == 1:
-                button_generate['text'] = "REGENERATE REPORTS"
-                button_downall['state'] = tk.NORMAL
-            else:
-                button_generate['text'] = "GENERATE ALL"
-                button_delete['text']  = "DELETE ALL"
-                button_downall['state'] = tk.DISABLED
-            button_view['state'] = tk.NORMAL
-        else:
-            if tot_selected_items == 1:
-                button_generate['text'] = "GENERATE REPORTS"
-            else:
-                button_generate['text'] = "GENERATE ALL"
-                button_downall['text']  = "DELETE ALL"
-            button_downall['state'] = tk.DISABLED
-            button_view['state'] = tk.DISABLED
-            
-        # button_generate['text'] = "Generate reports"
-        # button_generate["state"] = "normal"
-        # print(button_generate, curItemId)
-        print(tree.item(curItemId))
-    else:
-        disableButtons()
-    """
+
 
 def disableButtons(event=None):
     global curItemId
@@ -126,6 +99,7 @@ def disableButtons(event=None):
     print("disableButtons event:", tree.item(curItemId))
 
 
+# Useless
 def enterDate(event=None):
     # input_datetime.delete(0, tk.END)
     # input_datetime.insert(0, datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
@@ -149,7 +123,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     elif (data_sheet.endswith('.csv')):
         data = tsc.Parse_Csv_To_List(fname)
     else:
-        # Unrecognized file format
+        # If given unrecognized file format
         return
     tscdata, studata = tsc.Tscores_And_Students_ImpData(data)
     # pprint(studata) 
@@ -160,11 +134,8 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     codednames = rutil.generate_codenames_list(studata)
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     print(f'{codednames=}')
-    # survey_name = tree.
     rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, survey_name)
-    rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id)
-    
-    # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
+    rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id)    
     # rootwindow.config(cursor='')
 
 
@@ -848,6 +819,7 @@ if __name__ == '__main__':
     pick_order.bind("<<ComboboxSelected>>", updateView)
     pick_institute.bind("<<ComboboxSelected>>", updateDeptBox)
 
+    """ Test 500 records upload to DB"""
     # bf = Create_Busy_Frame(rootwindow)
     # bf.update()
     # for i in range(500):
