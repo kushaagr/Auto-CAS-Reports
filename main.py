@@ -240,6 +240,13 @@ def Copy_All_Reports():
             subprocess.run(["explorer", dest])
 
 
+def clearInputs():
+    input_filepath.configure(state='normal')
+    input_filename.delete(0, tk.END)
+    input_filepath.delete(0, tk.END)
+    input_filepath.configure(state='readonly')
+
+
 def Upload_Action():
     global inputs
     
@@ -282,6 +289,7 @@ def Upload_Action():
     
     Upload_Report(inputs)
     updateView()
+    clearInputs()
     print(inputs)
 
 
@@ -347,7 +355,7 @@ def updateView(event=None):
     for row in rows:
         # print("current:", row, row[1:3])
         # name = f"({row[3] if row[3]!='' else 'N/a'}{'-'+str(row[4]) if row[4]!='' else ''}) {row[1]}"
-        name        = f"({row[3] if row[3] not in ('', '...') else 'Unspecified'}" + \
+        displayname = f"({row[3] if row[3] not in ('', '...') else 'Unspecified'}" + \
                     f"{' '+str(row[4]) if row[4]!='' else ''}) {row[1]}"
         giventime   = parser.parse(row[2])
         uploadtime  = parser.parse(row[-1])
@@ -356,7 +364,8 @@ def updateView(event=None):
         primaryid   = int(row[0])
         giventime   = giventime.strftime("%d-%m-%Y %H:%M")
         uploadtime  = uploadtime.strftime("%d-%m-%Y %H:%M")
-        tree.insert("", tk.END, values=(name, giventime, uploadtime, ogpath, filename, primaryid))
+        tree.insert("", tk.END, values=(displayname, giventime, uploadtime,
+                                        ogpath, filename, primaryid))
     # con1.close()
 
     if debug_setting:
@@ -577,6 +586,36 @@ def updateDeptBox(e=None):
     pass
 
 
+def openinfowindow(parentwindow):
+    infowindow = tk.Toplevel(parentwindow)
+    FALLBACK_INFO = """
+Developed by:
+
+* Ashutosh Dubey\t\t(IMCA 2021 batch)
+* Durva Shinde\t\t(IMCA 2021 batch)
+* Kushagra Mehrotra\t(IMCA 2019 batch)
+Student at Acropolis FCA department under guidance of Prof. Nitin Kulkarni.
+
+For help and assistance email at: 
+kushagramehrotra.ca19@acropolis.in
+    """
+    info = FALLBACK_INFO
+    label_contributors = tk.Label(infowindow, text=info, justify='left')
+    label_contributors.pack(ipadx=PX)
+    pass
+
+
+def createFooter(parentwindow):
+    INFO_DEPT       = """Made by students at FCA department"""
+    label_madeby    = tk.Label(parentwindow, text=INFO_DEPT)
+    button_info     = tk.Button(parentwindow, text="?", 
+                        command=lambda: openinfowindow(parentwindow))
+
+    button_info.pack(side='right', ipadx=PX)
+    label_madeby.pack(side='right', padx=PX)
+
+    return button_info, label_madeby
+
 if __name__ == '__main__':
     """
     TODOs
@@ -747,8 +786,9 @@ if __name__ == '__main__':
                 # ).place(x=20, y=20, relheight=1)
 
 
-    tree = ttk.Treeview(rootwindow, columns=("surveyname","date","uploadtime","ogfilepath","filename","pk"),
-            show='headings', displaycolumns=(0,1,2))
+    tree = ttk.Treeview(rootwindow, columns=("surveyname","date",
+            "uploadtime","ogfilepath","filename","pk"), show='headings', 
+            displaycolumns=(0,1,2))
     tree.heading("surveyname",  text="Survey name", anchor="w")
     tree.heading("date",        text="Survey Timestamp", anchor="center")
     tree.heading("uploadtime",  text="Upload Timestamp", anchor="center")
@@ -801,6 +841,17 @@ if __name__ == '__main__':
     label_filter.grid(column=7, row=1, sticky=tk.W, padx=PX)
     button_clearbox.grid(column=7, row=0, sticky=tk.E, padx=PX, pady=0)
 
+    ttk.Separator(rootwindow,
+                orient=tk.HORIZONTAL, 
+                style='TSeparator',
+                cursor='man',
+                ).grid(column=0, row=998, columns=999, sticky=tk.E+tk.W)
+
+
+    frame_footer = tk.Frame(rootwindow)
+    frame_footer.grid(row=999, column=0, columns=999, sticky=tk.E+tk.W)
+    # binfo, lmadeby = createFooter(frame_footer)
+    createFooter(frame_footer)
 
     tree.bind('<ButtonRelease-1>', enableButtons)
     # tree.bind('<Up>', enableButtons)
