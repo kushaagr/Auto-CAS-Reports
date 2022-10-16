@@ -105,19 +105,20 @@ def generate_codenames_list_e1(data: list):
 
 
 def Upload_Summary(dirpath: str, tscores: list, 
-                    studata: list, codenames: list, survey_name: str=''):
+                    studata: list, codenames: list, AllQuestions: list,survey_name: str=''):
     header = ('NAME', 
     'CODE NAME',
     # 'DEMOGRAPHICS (AGE, GENDER, INSTITUTE, STREAM, YEAR, MONTHY FAMILY INCOME)',
     # 'CONTACT DETAILS (EMAIL, MOBILE)',
     *studata[0][1:],
+    *AllQuestions[0][0:],
     'AN-TSCORE', 'DP-TSCORE', 'SI-TSCORE', 'SA-TSCORE', 'SE-TSCORE', 'IP-TSCORE', 'FP-TSCORE', 'AP-TSCORE', 'CP-TSCORE')
     wb = op.Workbook()
     sheet = wb.active
     sheet.append(header)
     for gi, cname in enumerate(codenames, start=1):
         name    = studata[gi][0]
-        sheet.append((name, cname, *studata[gi][1:], *tscores[gi]))
+        sheet.append((name, cname, *studata[gi][1:],*AllQuestions[gi][0:], *tscores[gi]))
 
     if (survey_name.strip() != ''):
         survey_name = f" - {survey_name}"
