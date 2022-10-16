@@ -105,7 +105,7 @@ def generate_codenames_list_e1(data: list):
 
 
 def Upload_Summary(dirpath: str, tscores: list, 
-                    studata: list, codenames: list):
+                    studata: list, codenames: list, survey_name: str=''):
     header = ('NAME', 
     'CODE NAME',
     # 'DEMOGRAPHICS (AGE, GENDER, INSTITUTE, STREAM, YEAR, MONTHY FAMILY INCOME)',
@@ -119,7 +119,9 @@ def Upload_Summary(dirpath: str, tscores: list,
         name    = studata[gi][0]
         sheet.append((name, cname, *studata[gi][1:], *tscores[gi]))
 
-    wb.save(f"{dirpath}/summary.xlsx")
+    if (survey_name.strip() != ''):
+        survey_name = f" - {survey_name}"
+    wb.save(f"{dirpath}/Summary{survey_name}.xlsx")
 
 
 def plot_tscores(pdfobj, col1: list, col2: list, 
