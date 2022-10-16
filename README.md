@@ -8,6 +8,40 @@ It is a rapid method of screening college students for common developmental psyc
 This tool automates the process of calculating T-scores and generating pdf reports based
 on data provided.
 
+## Downloads
+
+Windows setup for compiled application could be found in releases section [(here)](https://github.com/kushaagr/Auto-CAS-Reports/releases)
+  
+The application upon installation can be run from start menu or through desktop shortcut.
+
+## How to run code?
+
+Clone git repo to your local machine:  
+```git
+git clone https://github.com/kushaagr/Auto-CAS-Reports.git
+```
+
+or  
+
+[Download this code as zip](https://github.com/kushaagr/Auto-CAS-Reports/archive/refs/heads/main.zip)  
+
+
+After getting code on your local machine, follow either of the two methods.  
+
+
+### Method 1:
+1. Click on setup.bat to install all required python libraries.  
+2. Now click on run.bat to execute the python code.  
+### Method 2:
+1. Open command line and type:
+```cmd
+pip install -r requirements.txt 
+```
+2. Then execute python code by typing:
+```cmd
+python main.py
+```
+
 
 ## Application input
 
@@ -49,5 +83,6 @@ Required an excel or csv file where columns should be:
 
 * Ashutosh Dubey      (IMCA 2021 batch)
 * Durva Shinde        (IMCA 2021 batch)
-* Kushagra Mehrotra   (IMCA 2019 batch)
+* Kushagra Mehrotra   (IMCA 2019 batch)  
+
 Made by students at Acropolis FCA Department
