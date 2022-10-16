@@ -82,34 +82,7 @@ def enableButtons(a=None):
             button_downall['state'] = tk.DISABLED
     else:
         disableButtons()
-    """
-    if tot_selected_items > 0:
-        button_delete['state'] = tk.NORMAL
-        if pathlib.Path(f'./data/reports/{pathlib.Path(item[-2]).stem}').is_dir():
-            if tot_selected_items == 1:
-                button_generate['text'] = "REGENERATE REPORTS"
-                button_downall['state'] = tk.NORMAL
-            else:
-                button_generate['text'] = "GENERATE ALL"
-                button_delete['text']  = "DELETE ALL"
-                button_downall['state'] = tk.DISABLED
-            button_view['state'] = tk.NORMAL
-        else:
-            if tot_selected_items == 1:
-                button_generate['text'] = "GENERATE REPORTS"
-            else:
-                button_generate['text'] = "GENERATE ALL"
-                button_downall['text']  = "DELETE ALL"
-            button_downall['state'] = tk.DISABLED
-            button_view['state'] = tk.DISABLED
-            
-        # button_generate['text'] = "Generate reports"
-        # button_generate["state"] = "normal"
-        # print(button_generate, curItemId)
-        print(tree.item(curItemId))
-    else:
-        disableButtons()
-    """
+
 
 def disableButtons(event=None):
     global curItemId
@@ -126,6 +99,7 @@ def disableButtons(event=None):
     print("disableButtons event:", tree.item(curItemId))
 
 
+# Useless
 def enterDate(event=None):
     # input_datetime.delete(0, tk.END)
     # input_datetime.insert(0, datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
@@ -137,7 +111,7 @@ def enterTime(event=None):
     pass
 
 
-def Perform_File_Operations(data_sheet: str, survey_id: int):
+def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     # FILE = 'cas-copy.xlsx'
     # rootwindow.configure(cursor='wait')
     # rootwindow.config(cursor='watch')
@@ -149,7 +123,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int):
     elif (data_sheet.endswith('.csv')):
         data = tsc.Parse_Csv_To_List(fname)
     else:
-        # Unrecognized file format
+        # If given unrecognized file format
         return
     tscdata, studata, AllQuestions = tsc.Tscores_And_Students_ImpData(data)
     # pprint(studata) 
@@ -159,7 +133,8 @@ def Perform_File_Operations(data_sheet: str, survey_id: int):
     reportsdir = dutil.create_report_folder(data_sheet)
     codednames = rutil.generate_codenames_list(studata)
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
-    rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, AllQuestions)
+    print(f'{codednames=}')
+    rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, AllQuestions ,survey_name)
     rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id)
     # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')
@@ -196,9 +171,10 @@ def Generate_Action():
     rootwindow.withdraw()
     # if True:
     for treeItemId in tree.selection():
-        # print( data := tree.item(tree.focus())['values'] )
-        print( data := tree.item(treeItemId)['values'] )
-        item_id = int(data[-1])
+        # print( treedata := tree.item(tree.focus())['values'] )
+        print( treedata := tree.item(treeItemId)['values'] )
+        item_id = int(treedata[-1])
+        survey_name = treedata[0]
         # print(item_id)
         con1 = con or sqlite3.connect(config.DB)
         cur = con1.cursor()
@@ -210,7 +186,7 @@ def Generate_Action():
         print(fname)
         print()
         try:
-            Perform_File_Operations(fname, item_id)
+            Perform_File_Operations(fname, item_id, survey_name)
         except Exception as e:
             busyframe.grab_release()
             rootwindow.deiconify()
@@ -292,8 +268,10 @@ def Upload_Action():
 
     # rawfilename = '' 
     # rawfilename = dutil.upload_raw_file(input_filepath.get()) # with extension
+    # print(f'{ogfilename.get()=}')
+    filename = pathlib.Path(rawfilename).stem
     inputs = [
-        input_filename.get(),
+        input_filename.get().strip() or filename,
         given_timestamp,
         pick_institute.get().strip(), 
         pick_department.get().strip(),
@@ -425,6 +403,9 @@ def View_Reports():
             Fetch details for selected report from tblSurveyReports using pk from tblSurveySheets
             Append details to student details treeview
     """
+    # TODO: Add a button to View Summary sheet
+    # TODO: Add a button to Download Summary sheet
+
     TIP = "Use mousewheel to scroll vertically, and press SHIFT key with mousewheel to scoll horizontally." + \
         "\n" + "Use Ctrl+Leftclick to select items.\n" +\
         "Use Shift+Leftclick to select multiple items in sequence." +\
@@ -769,7 +750,7 @@ if __name__ == '__main__':
     tree = ttk.Treeview(rootwindow, columns=("surveyname","date","uploadtime","ogfilepath","filename","pk"),
             show='headings', displaycolumns=(0,1,2))
     tree.heading("surveyname",  text="Survey name", anchor="w")
-    tree.heading("date",        text="Sruvey Timestamp", anchor="center")
+    tree.heading("date",        text="Survey Timestamp", anchor="center")
     tree.heading("uploadtime",  text="Upload Timestamp", anchor="center")
     tree.heading("pk",          text="ID", anchor="w")
     tree.column("surveyname", stretch=True, minwidth=250)
@@ -839,6 +820,7 @@ if __name__ == '__main__':
     pick_order.bind("<<ComboboxSelected>>", updateView)
     pick_institute.bind("<<ComboboxSelected>>", updateDeptBox)
 
+    """ Test 500 records upload to DB"""
     # bf = Create_Busy_Frame(rootwindow)
     # bf.update()
     # for i in range(500):

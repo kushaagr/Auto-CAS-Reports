@@ -32,7 +32,7 @@ TEMPLATE_WITH_CONTACT   = 'template-with-contact-info.png'
 ACROCARE_EMAIL          = r'mailto:acrocare@acropolis.in'
 AITR_URL = r'https://aitr.ac.in/'
 AITRGOOGLE_URL = r'https://www.google.com/search?q=acropolis+institute+of+technology+and+research&source=lmns&bih=568&biw=1366&hl=en&sa=X&ved=2ahUKEwi-7LL_oJD3AhWz_DgGHaamCjEQ_AUoAHoECAEQAA'
-
+debug_setting = config.DEBUG_MODE
 
 # def generate_codename(studata: list, department: str, count: int) -> str:
 # def generate_codename(studata: list, department: str) -> str:
@@ -65,14 +65,18 @@ def generate_codename(studata: list) -> str:
 def generate_codenames_list(data: List[List[str]]) -> list:
     codenames = []
     created_codenames = set()
+    print(f'{data=}')
+    # for gi, arr in enumerate(data, start=1):
     for gi in range(1, len(data)):
         # codename = ''
         count = 1
         # codename = generate_codename(data[gi], whichdepartment)
+        print("index=",gi, end=" ")
         codename = generate_codename(data[gi])
         while (f'{codename}{count:03}' in created_codenames):
             count += 1
         codename = f'{codename}{count:03}'
+        codenames.append(codename)
         created_codenames.add(codename)
     return codenames
 
@@ -101,7 +105,7 @@ def generate_codenames_list_e1(data: list):
 
 
 def Upload_Summary(dirpath: str, tscores: list, 
-                    studata: list, codenames: list, AllQuestions: list):
+                    studata: list, codenames: list, AllQuestions: list,survey_name: str=''):
     header = ('NAME', 
     'CODE NAME',
     # 'DEMOGRAPHICS (AGE, GENDER, INSTITUTE, STREAM, YEAR, MONTHY FAMILY INCOME)',
@@ -112,11 +116,13 @@ def Upload_Summary(dirpath: str, tscores: list,
     wb = op.Workbook()
     sheet = wb.active
     sheet.append(header)
-    for i, cname in enumerate(codenames, start=1):
-        name    = studata[i][0]
-        sheet.append((name, cname, *studata[i][1:], *AllQuestions[i][0:], *tscores[i]))
+    for gi, cname in enumerate(codenames, start=1):
+        name    = studata[gi][0]
+        sheet.append((name, cname, *studata[gi][1:],*AllQuestions[gi][0:], *tscores[gi]))
 
-    wb.save(f"{dirpath}/summary.xlsx")
+    if (survey_name.strip() != ''):
+        survey_name = f" - {survey_name}"
+    wb.save(f"{dirpath}/Summary{survey_name}.xlsx")
 
 
 def plot_tscores(pdfobj, col1: list, col2: list, 
@@ -312,8 +318,9 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list,
                         # pdfile.write(h=__DEF_FSIZE, txt=advice)
                         # pdfile.write(h=8, txt="\n"+advice)
                         pdfile.ln()
-                        print(advice)
-                        print(pdfile.get_y())
+                        if debug_setting:
+                            print(advice)
+                            print(pdfile.get_y())
 
                 pdfile.set_font(style="B")
                 pdfile.ln(10)
