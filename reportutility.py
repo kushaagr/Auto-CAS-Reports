@@ -212,7 +212,7 @@ def plot_problem_areas(pdfobj, col: list,
     # pdfobj.set_fill_color(255)
 
 
-def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list, 
+def Create_All_Reports(dirpath: str, tscoreslist: list, data: list, 
                         graphs: list, survey_id: int, codenames: list = None,
                         whichdepartment: str = None) -> str:
 

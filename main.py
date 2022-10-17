@@ -6,19 +6,19 @@ import reportutility as rutil
 
 import os
 import subprocess
-import openpyxl
 import sqlite3
 import pathlib
 import shutil
 import logging
 import traceback
 import tkinter as tk
-from pprint import pprint
 from datetime import datetime
-from dateutil import parser
 from tkinter import ttk
 from tkinter import filedialog, messagebox
+from pprint import pprint
 
+import openpyxl
+from dateutil import parser
 
 # globals are {curItemId, button_generate, order}
 # 1 is ascending order and 0 is descending order
@@ -48,7 +48,8 @@ def setupLogging(file: str, enc: str = 'ascii', level=logging.WARNING):
 
 
 def enableButtons(a=None):
-    global button_generate, curItemId
+    # global button_generate, curItemId
+    # global curItemId
     curItemId = ''
     print("type is ", type(tree.selection()), "items are", tree.selection())
     # print("focused", [tree.focus(i) for i in range(len(tree.selection()))])
@@ -160,8 +161,8 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     print(f'{codednames=}')
     rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, allquestions , rawscores, survey_name)
-    rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, codednames)
-    # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
+    rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, codednames)
+    # rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')
 
 
