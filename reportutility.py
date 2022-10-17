@@ -298,6 +298,8 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list,
             elif i == 5:
                 pdfile.set_margins(20, 0, 20)
                 pdfile.set_font_size(__DEF_FSIZE+5)
+                # pdfile.set_font_size(__DEF_FSIZE+3)
+                # pdfile.set_font_size(__DEF_FSIZE+1)
                 pdfile.set_y(35)
                 # for ii, keys in enumerate(problemareas[1:]):
                 for ii, keys in enumerate(problemareas):
@@ -334,13 +336,16 @@ def Upload_All_Reports(dirpath: str, tscoreslist: list, data: list,
 
                 pdfile.set_font(style="B")
                 pdfile.ln(10)
-                pdfile.write(txt="Do not hesitate to connect with counselor to seek professional help immediately.")
+                pdfile.write(
+                    txt="Do not hesitate to connect with counselor to seek " +
+                    f"professional help{' immediately' if len(problemareas) > 0 else ''}.")
                 pdfile.set_font(style="")
                 
                 pdfile.ln(210)
                 pdfile.set_x(40)
                 # pdfile.cell(70, 20, "sample", border=1)
                 pdfile.link(40, 210, 70, 20, ACROCARE_EMAIL)
+                pdfile.set_font_size(__DEF_FSIZE)
 
 
             # Page 6
