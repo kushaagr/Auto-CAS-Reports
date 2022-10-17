@@ -36,7 +36,7 @@ MIXED       = "MIXED"
 COMBINED    = "COMBINED"
 
 
-def setupLogging(file: str, enc: str = 'ascii', level=logging.WARNING):
+def setup_logging(file: str, enc: str = 'ascii', level=logging.WARNING):
     """
     https://docs.python.org/3/howto/logging.html
     https://docs.python.org/3/library/codecs.html#module-codecs
@@ -160,7 +160,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     codednames = rutil.generate_codenames_list(studata)
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     print(f'{codednames=}')
-    rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, allquestions , rawscores, survey_name)
+    rutil.Create_Summary(reportsdir, tscdata, studata, codednames, allquestions , rawscores, survey_name)
     rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, codednames)
     # rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')
@@ -720,7 +720,7 @@ if __name__ == '__main__':
  
     """
 
-    setupLogging(file=config.LOGFILE, enc='utf-8')
+    setup_logging(file=config.LOGFILE, enc='utf-8')
 
     # SQL interface
     if not os.path.exists(config.DBLOC):

@@ -110,7 +110,7 @@ def getsummaryname(survey_name: str) -> str:
     return f"Summary.xlsx"
 
 
-def Upload_Summary(dirpath: str, tscores: list, 
+def Create_Summary(dirpath: str, tscores: list, 
                     studata: list, codenames: list, AllQuestions: list, Raw_scores: list,survey_name: str=''):
     header = ('NAME', 
     'CODE NAME',
