@@ -111,20 +111,21 @@ def getsummaryname(survey_name: str) -> str:
 
 
 def Upload_Summary(dirpath: str, tscores: list, 
-                    studata: list, codenames: list, AllQuestions: list,survey_name: str=''):
+                    studata: list, codenames: list, AllQuestions: list, Raw_scores: list,survey_name: str=''):
     header = ('NAME', 
     'CODE NAME',
     # 'DEMOGRAPHICS (AGE, GENDER, INSTITUTE, STREAM, YEAR, MONTHY FAMILY INCOME)',
     # 'CONTACT DETAILS (EMAIL, MOBILE)',
     *studata[0][1:],
     *AllQuestions[0][0:],
+    *Raw_scores[0][0:],
     'AN-TSCORE', 'DP-TSCORE', 'SI-TSCORE', 'SA-TSCORE', 'SE-TSCORE', 'IP-TSCORE', 'FP-TSCORE', 'AP-TSCORE', 'CP-TSCORE')
     wb = op.Workbook()
     sheet = wb.active
     sheet.append(header)
     for gi, cname in enumerate(codenames, start=1):
         name    = studata[gi][0]
-        sheet.append((name, cname, *studata[gi][1:],*AllQuestions[gi][0:], *tscores[gi]))
+        sheet.append((name, cname, *studata[gi][1:], *AllQuestions[gi][0:], *Raw_scores[gi][0:], *tscores[gi]))
 
     wb.save(f"{dirpath}/{getsummaryname(survey_name)}")
     # if (survey_name.strip() != ''):
