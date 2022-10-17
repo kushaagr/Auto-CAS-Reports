@@ -51,13 +51,15 @@ def enableButtons(a=None):
     # global button_generate, curItemId
     # global curItemId
     curItemId = ''
-    print("type is ", type(tree.selection()), "items are", tree.selection())
+    print("type is ", type(tree.selection()), 
+        "items are", tree.selection())
     # print("focused", [tree.focus(i) for i in range(len(tree.selection()))])
     tot_selected_items = len(tree.selection())
     if tot_selected_items > 0:
         # curItemId = tree.focus()
         curItemId = tree.selection()[0]
-    print("event is", a, "and Item ID is", curItemId, type(curItemId), len(curItemId))
+    print("event is", a, "and Item ID is", curItemId, 
+        type(curItemId), len(curItemId))
     button_generate['state'] = tk.NORMAL
     item : list = tree.item(curItemId)['values']
     # print("tree:", tree.focus())
@@ -92,7 +94,8 @@ def enableButtons(a=None):
                 uploadedfilename    = pathlib.Path(filepath).name
                 uploadedfiles.append(uploadedfilename)
             filelist = ", ".join(uploadedfiles)
-            ogfilename.set(f'({filelist[:80]}' + ( "...)" if len(filelist) >= 80 else ")" ))
+            ogfilename.set(f'({filelist[:80]}' + ( "...)" 
+                if len(filelist) >= 80 else ")" ))
             button_generate['text'] = "GENERATE ALL"
             button_delete['text']  = "DELETE ALL"
             button_downall['state'] = tk.DISABLED
@@ -160,9 +163,10 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     codednames = rutil.generate_codenames_list(studata)
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     print(f'{codednames=}')
-    rutil.Create_Summary(reportsdir, tscdata, studata, codednames, allquestions , rawscores, survey_name)
-    rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, codednames)
-    # rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
+    rutil.Create_Summary(reportsdir, tscdata, studata, codednames, 
+                        allquestions , rawscores, survey_name)
+    rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, 
+                        survey_id, codednames)
     # rootwindow.config(cursor='')
 
 
@@ -184,7 +188,7 @@ def Create_Busy_Frame(parentwindow):
     center_window(bsframe, 300, 100)
     bsframe.title("Wait...")
     label = tk.Label(bsframe, text="Generating reports...", anchor='center')
-    # label.grid(column=0, row=0, sticky=tk.E + tk.W + tk.N + tk.S)#, padx=10*PX, ipady=4*PY, anchor='w')
+    # label.grid(column=0, row=0, sticky=tk.E + tk.W + tk.N + tk.S)
     label.pack(anchor='center', fill='both', expand=1)
     return bsframe
     pass
@@ -261,7 +265,8 @@ def Copy_All_Reports():
         print("Download finished!")
         print(dest)
         # messagebox.showinfo("Download complete!", "Download complete!!")
-        answer = messagebox.askyesno("Download complete", "Would you like to open the folder?")
+        answer = messagebox.askyesno("Download complete", 
+                    "Would you like to open the folder?")
         if (answer == True):
             # subprocess.Popen(f"explorer.exe \"{dest}\"", shell=True)
             subprocess.run(["explorer", dest])
@@ -269,7 +274,7 @@ def Copy_All_Reports():
 
 def clearInputs():
     input_filepath.configure(state='normal')
-    input_filename.delete(0, tk.END)
+    input_surveyname.delete(0, tk.END)
     input_filepath.delete(0, tk.END)
     input_time.delete(0, tk.END)
     input_filepath.configure(state='readonly')
@@ -291,14 +296,14 @@ def Upload_Action():
             return
         try:
             # given_timestamp = parser.parse("00:00")
-            # given_timestamp = parser.parse(input_datetime.get())
-            
+            # given_timestamp = parser.parse(input_datetime.get())            
             print(date)
             given_timestamp = parser.parse(date)
-            pass
         #except parser.ParserError:
         except Exception:
-            messagebox.showerror("Error", "Given datetime format is not correct!\nExample: 01/03/22 3:30pm")
+            messagebox.showerror("Error", 
+                "Given datetime format is not correct!\n" +\
+                "Example: 01/03/22 3:30pm")
             return
 
     # rawfilename = '' 
@@ -306,12 +311,14 @@ def Upload_Action():
     # print(f'{ogfilename.get()=}')
     filename = pathlib.Path(rawfilename).stem
     inputs = [
-        input_filename.get().strip() or filename,
+        input_surveyname.get().strip() or filename,
         given_timestamp,
         pick_institute.get().strip(), 
         pick_department.get().strip(),
+        # This second rawfilename will be modified in Upload_Report() 
+        # function, so we need two of these
         rawfilename,
-        rawfilename, # This field value will be modified in Upload_Report() function, so we need two of these
+        rawfilename, 
         datetime.now()
     ]
     
@@ -337,7 +344,6 @@ def Upload_Report(data: list):
     print("rows: ", rows)
     con1.commit()
     # con.close()
-    # pass
 
 
 def Change_Sort_Order(event=None):
@@ -346,7 +352,6 @@ def Change_Sort_Order(event=None):
     button_order.configure(text = f"{'^' if order else 'v'}")
     updateView()
     disableButtons()
-    # pass
 
 
 def Clear_Filter(event=None):
@@ -382,7 +387,8 @@ def updateView(event=None):
 
     for row in rows:
         # print("current:", row, row[1:3])
-        # name = f"({row[3] if row[3]!='' else 'N/a'}{'-'+str(row[4]) if row[4]!='' else ''}) {row[1]}"
+        # name = f"({row[3] if row[3]!='' else 'N/a'}{'-'+str(row[4]) 
+        # if row[4]!='' else ''}) {row[1]}"
         displayname = f"({row[3] if row[3] not in ('', '...') else 'Unspecified'}" + \
                     f"{' '+str(row[4]) if row[4]!='' else ''}) {row[1]}"
         giventime   = parser.parse(row[2])
@@ -402,7 +408,6 @@ def updateView(event=None):
         # print("...... Rows", uploadtime)
         # print("......", sortorder)
         print("..updated!")
-        pass
 
 
 def Download_Selected_Reports(treeobject, pdfdir, parentwindow):
@@ -423,14 +428,14 @@ def Download_Selected_Reports(treeobject, pdfdir, parentwindow):
         print("Download finished!")
         print(dest)
         # messagebox.showinfo("Download complete!", "Download complete!!")
-        answer = messagebox.askyesno("Download complete", "Would you like to open the folder?")
+        answer = messagebox.askyesno("Download complete", 
+                    "Would you like to open the folder?")
         if (answer == True):
             # subprocess.Popen(f"explorer.exe \"{dest}\"", shell=True)
             dest = dest.translate({ord('/'):'\\'})
             subprocess.run(["explorer", dest])
     else:
         messagebox.showerror("Not found", "Files do not exist.")
-    pass
 
 
 def View_Reports():
@@ -450,8 +455,9 @@ def View_Reports():
         # "\n\n" + "*If downloaded files have same name as file in destination folder then those files will be overwritten."
     FIELD_ID    = ('cname', 'totpa', 'sname', 'semail', 'mobile', 'age',
         'gender', 'stream', 'year', 'filename')
-    FIELDS_NAME = ('Codename', 'Tot. Problem Areas', 'Student name', 'Email', 'Mobile number', 
-        'Age', 'Gender', 'Department', 'Year', 'FILE')
+    FIELDS_NAME = ('Codename', 'Tot. Problem Areas', 'Student name', 
+        'Email', 'Mobile number', 'Age', 'Gender', 'Department', 
+        'Year', 'FILE')
     SHOW_COLS = tuple(range(len(FIELD_ID) - 1))
 
     for treeItemId in tree.selection():
@@ -459,11 +465,13 @@ def View_Reports():
         surveyid = item[-1]
         con1 = con or sqlite3.connect(config.DB)
         cur = con1.cursor()
-        cur.execute("""SELECT file FROM tblSurveySheets WHERE id = ?""", (surveyid,))
+        cur.execute("""SELECT file FROM tblSurveySheets WHERE id = ?""", 
+            (surveyid,))
         reportsdir = pathlib.Path( cur.fetchone()[0] ).stem
-        cur.execute("""SELECT student_codename, tot_problem_areas, student_name, email, 
-            mobile_number, age, gender, stream, year, report_file
-            FROM tblSurveyReports WHERE survey_id = ?""", (surveyid,))
+        cur.execute("""SELECT student_codename, tot_problem_areas, 
+            student_name, email, mobile_number, age, gender, stream, 
+            year, report_file FROM tblSurveyReports WHERE survey_id = ?""", 
+            (surveyid,))
         # cur.execute("""SELECT student_name
             # FROM tblSurveyReports WHERE survey_id = ?""", (surveyid,))
         rows = cur.fetchall()
@@ -474,11 +482,17 @@ def View_Reports():
         reportsframe = tk.Toplevel(rootwindow)
         tree_studentsinfo = ttk.Treeview(reportsframe, columns=FIELD_ID,
                                 show='headings', displaycolumns=SHOW_COLS)
-        button_downselected = tk.Button(reportsframe, anchor='center', text="Download selected reports",
-            width=BUTTON_WIDTH, command=lambda: Download_Selected_Reports(tree_studentsinfo, reportsdir, reportsframe))
-        button_openselected = tk.Button(reportsframe, anchor='center', text="Open selected reports",
-            width=BUTTON_WIDTH, command=lambda: openFile(tree_studentsinfo))
-        label_info = tk.Label(reportsframe, text=TIP, justify=tk.LEFT, anchor='w')
+        button_downselected = tk.Button(reportsframe, anchor='center', 
+            text="Download selected reports", width=BUTTON_WIDTH, 
+            command=lambda: Download_Selected_Reports(tree_studentsinfo, 
+                reportsdir, reportsframe)
+            )
+        button_openselected = tk.Button(reportsframe, anchor='center', 
+            text="Open selected reports", width=BUTTON_WIDTH, 
+            command=lambda: openFile(tree_studentsinfo)
+            )
+        label_info = tk.Label(reportsframe, text=TIP, justify=tk.LEFT, 
+                            anchor='w')
         
         for fid, ftitle in zip(FIELD_ID, FIELDS_NAME):
             # tree_studentsinfo.heading(fid, text=ftitle, anchor='center')
@@ -524,14 +538,15 @@ def View_Reports():
             for itemId in treeobj.selection():
                 subprocess.run(
                 # ['start', './data/reports/' + folder_name + '/' + tree_studentsinfo.item(
-                [ 'start', str(pathlib.Path(config.REPORTSFOL) / folder_name / tree_studentsinfo.item(
-                    itemId
-                    # tree_studentsinfo.focus()
-                )['values'][-1]) ], shell=True)
+                [ 'start', 
+                    str(pathlib.Path(config.REPORTSFOL) / folder_name / tree_studentsinfo.item(
+                        itemId
+                    )['values'][-1]) 
+                ], shell=True)
+                        # tree_studentsinfo.focus()
 
         # tree_studentsinfo.bind('<Double-1>', lambda e: openFile(tree_studentsinfo))
         tree_studentsinfo.bind('<<TreeviewOpen>>', lambda e: openFile(tree_studentsinfo))
-    pass
 
 
 def Delete_Reports():
@@ -577,19 +592,21 @@ def Delete_Reports():
             con1.commit()
             tree.delete(itemid)
             print("Deletion done!")
-    pass
 
 
 def Browse_Files() -> str:
-    global inputs
 
-    input_filetypes = [('Excel files', '*.xlsx *.xlsm *.xls'), ('All files', '*.*')]
+    input_filetypes = [
+        ('Excel files', '*.xlsx *.xlsm *.xls'),
+        ('CSV files', '*.csv'),
+        ('All files', '*.*'),
+    ]
 
     filename = filedialog.askopenfilename(parent=rootwindow,
                                         initialdir=os.getcwd(),
                                         title="Please select a file:",
                                         filetypes=input_filetypes)
-    inputs.append(filename)
+
     input_filepath.configure(state=tk.NORMAL)
     input_filepath.delete(0, tk.END)
     input_filepath.insert(0, filename)
@@ -619,7 +636,6 @@ def Open_Associated_Summary():
         print(str(summary_sheet_path)) 
         # subprocess.run(['start', 'excel.exe',f'"{str(summary_sheet_path)}"'], shell=True)
         subprocess.Popen(f'start excel.exe "{str(summary_sheet_path)}"', shell=True)
-    pass
 
 
 def Copy_Summary():
@@ -630,7 +646,7 @@ def Copy_Summary():
     selecteditemid  = tree.focus()
     outputfol       = pathlib.Path(treedata[-2]).stem
     survey_name     = treedata[0]
-    reportspath = pathlib.Path(config.REPORTSFOL) / outputfol
+    reportspath     = pathlib.Path(config.REPORTSFOL) / outputfol
     if pathlib.Path(directory:=os.path.join(config.REPORTSFOL, outputfol)).is_dir():
         file        = rutil.getsummaryname(survey_name)
         srcpath     = pathlib.Path(directory) / file
@@ -654,7 +670,8 @@ def Copy_Summary():
         print("Summary sheet copies to desination!")
         print(dest)
         # messagebox.showinfo("Download complete!", "Download complete!!")
-        answer = messagebox.askyesno("Download complete", "Would you like to open the folder?")
+        answer = messagebox.askyesno("Download complete", 
+                    "Would you like to open the folder?")
         if (answer == True):
             # subprocess.Popen(f"explorer.exe \"{dest}\"", shell=True)
             subprocess.run(["explorer", dest])
@@ -664,7 +681,6 @@ def updateDeptBox(e=None):
     insti = pick_institute.get()
     pick_department['values']=college.INST_DEPT_MAP.get(insti, (COMBINED, ))
     pick_department.current(0)
-    pass
 
 
 def openinfowindow(parentwindow):
@@ -772,29 +788,33 @@ if __name__ == '__main__':
     department_value = college.INST_DEPT_MAP.get(institute_values[0], (COMBINED,))
     sort_keys = ('Upload Time (Default)', 'Survey Name', 'Survey Time',
                         'Institute', 'Department')
-    db_fields   = ('upload_time', 'survey_name', 'survey_time', 'institute', 'department')
+    db_fields   = ('upload_time', 'survey_name', 'survey_time', 
+                        'institute', 'department')
     comboBoxMap = dict(zip(sort_keys, db_fields))
     timevalue   = tk.StringVar()
     timevalue.set('')
 
-    label_filepath  = tk.Label(rootwindow, text="Browse input file*", anchor='w')
-    label_filename  = tk.Label(rootwindow, text="Survey name", anchor='w')
-    # label_datetime  = tk.Label(frame_datetime, text="Enter date and giventime of survey", anchor='w')
-    label_date      = ttk.LabelFrame(frame_datetime, text="Pick date of survey:*", 
-                        width=FIELD_SIZE//2)
-    label_time      = ttk.LabelFrame(frame_datetime, text="Time of survey (optional):")
+    label_filepath  = tk.Label(rootwindow, text="Browse input file*", 
+                            anchor='w')
+    label_surveyname= tk.Label(rootwindow, text="Survey name", anchor='w')
+    # label_datetime  = tk.Label(frame_datetime, 
+    #                    text="Enter date and giventime of survey", anchor='w')
+    label_date      = ttk.LabelFrame(frame_datetime, 
+                        text="Pick date of survey:*", width=FIELD_SIZE//2)
+    label_time      = ttk.LabelFrame(frame_datetime, 
+                        text="Time of survey (optional):")
     label_institute = tk.Label(rootwindow, text="Institute", anchor='w')
     label_department= tk.Label(rootwindow, text="Department", anchor='w')
 
     input_filepath  = tk.Entry(rootwindow, width=FIELD_SIZE)
-    input_filename  = tk.Entry(rootwindow, width=FIELD_SIZE)
+    input_surveyname= tk.Entry(rootwindow, width=FIELD_SIZE)
     # input_datetime  = tk.Entry(frame_datetime, width=FIELD_SIZE)
-    pick_day        = ttk.Combobox(label_date, values=DATERANGE, state='readonly', 
-        width='3')
-    pick_month      = ttk.Combobox(label_date, values=MONTHRANGE, state='readonly', 
-        width='4')
-    pick_year       = ttk.Combobox(label_date, values=YEARRANGE, state='readonly',
-        width='5')
+    pick_day        = ttk.Combobox(label_date, values=DATERANGE, 
+        state='readonly', width='3')
+    pick_month      = ttk.Combobox(label_date, values=MONTHRANGE, 
+        state='readonly', width='4')
+    pick_year       = ttk.Combobox(label_date, values=YEARRANGE, 
+        state='readonly', width='5')
     input_time      = tk.Entry(label_time, textvariable=timevalue)
     pick_institute  = ttk.Combobox(rootwindow, width=FIELD_SIZE-3,
         text="Institute", values=institute_values, state='readonly')
@@ -816,14 +836,16 @@ if __name__ == '__main__':
     # button_browse.update()
     # print(button_browse.winfo_width())
 
-    label_filepath.grid(column=0, row=0, pady=(PY,0), sticky=tk.W+tk.E,)
+    label_filepath.grid(column=0, row=0, pady=(PY,0), sticky=tk.W+tk.E)
     input_filepath.grid(column=0, row=1, sticky=tk.W+tk.E)
-    button_browse.grid(column=0, row=2, pady = (PX, 0), padx=PX , sticky=tk.W+tk.E)
+    button_browse.grid(column=0, row=2, pady = (PX, 0), padx=PX, 
+        sticky=tk.W+tk.E)
 
-    label_filename.grid(column=0, row=3, pady=(PY,0), sticky=tk.W+tk.E)
-    input_filename.grid(column=0, row=4, sticky=tk.W+tk.E)
+    label_surveyname.grid(column=0, row=3, pady=(PY,0), sticky=tk.W+tk.E)
+    input_surveyname.grid(column=0, row=4, sticky=tk.W+tk.E)
 
-    frame_datetime.grid(column=0, row=5, rows=2, pady=(PY*2, 0), sticky=tk.W+tk.E)
+    frame_datetime.grid(column=0, row=5, rows=2, pady=(PY*2, 0), 
+        sticky=tk.W+tk.E)
     # label_datetime.grid(column=0, row=6, pady=(PY,0), sticky=tk.W)
     # input_datetime.grid(column=0, row=7, sticky=tk.W)
     # frame_datetime.update()
@@ -848,7 +870,7 @@ if __name__ == '__main__':
     # input_department.grid(column=0, row=13, sticky=tk.W+tk.E)
     # input_filepath.configure(width=FIELD_SIZE)
     # input_filepath.insert(0, "Provide an input file")
-    button_upload.grid(column=0, row=13, pady = PX, padx=PX , sticky=tk.W+tk.E)
+    button_upload.grid(column=0, row=13, pady=PX, padx=PX, sticky=tk.W+tk.E)
 
 
     input_filepath.insert(0, "")
@@ -882,15 +904,19 @@ if __name__ == '__main__':
     tree.heading("uploadtime",  text="Upload Timestamp", anchor="center")
     tree.heading("pk",          text="ID", anchor="w")
     tree.column("surveyname", stretch=True, minwidth=250)
-    tree.column("date",         stretch=True, minwidth=100, width=150, anchor='center')
-    tree.column("uploadtime",   stretch=True, minwidth=100, width=200, anchor='center')
+    tree.column("date",         stretch=True, minwidth=100, width=150, 
+                anchor='center')
+    tree.column("uploadtime",   stretch=True, minwidth=100, width=200, 
+                anchor='center')
     tree.rowconfigure(0, weight=1)
-    tree.grid(column=3, row=1, rowspan=14, columns=4, sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
+    tree.grid(column=3, row=1, rowspan=14, columns=4, 
+                sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
     
     ogfilename = tk.StringVar()
     ogfilename.set('')
 
-    label_associatedfile = tk.Label(rootwindow, textvariable=ogfilename, anchor='w')
+    label_associatedfile = tk.Label(rootwindow, textvariable=ogfilename, 
+                                    anchor='w')
     label_sortby    = tk.Label(rootwindow, text="Sort by:", anchor='w')
     pick_order      = ttk.Combobox(rootwindow, text="sort_by", 
         values=sort_keys, state='readonly')
@@ -898,19 +924,19 @@ if __name__ == '__main__':
     input_filter    = tk.Entry(rootwindow, width=17)
 
     button_generate = tk.Button(rootwindow, 
-                        text = 'GENERATE REPORTS', state='disabled',
+                        text = 'GENERATE REPORTS',  state='disabled',
                         command=Generate_Action)
     button_view     = tk.Button(rootwindow, 
-                        text = 'VIEW REPORTS', state='disabled',
+                        text = 'VIEW REPORTS',      state='disabled',
                         command=View_Reports)
     button_delete   = tk.Button(rootwindow, 
-                        text = 'DELETE SURVEY', state='disabled',
+                        text = 'DELETE SURVEY',     state='disabled',
                         command=Delete_Reports)
     button_downall  = tk.Button(rootwindow, 
-                        text = 'DOWNLOAD REPORTS', state='disabled',
+                        text = 'DOWNLOAD REPORTS',  state='disabled',
                         command=Copy_All_Reports)
     button_viewsum  = tk.Button(rootwindow,
-                        text = 'VIEW SUMMARY', state='disabled',
+                        text = 'VIEW SUMMARY',      state='disabled',
                         command=Open_Associated_Summary)
     button_savecopy = tk.Button(rootwindow,
                         text = 'SAVE A COPY OF \nSUMMARY', state='disabled',
@@ -918,7 +944,8 @@ if __name__ == '__main__':
     button_clearbox = tk.Button(rootwindow,
                         text = 'clear filter', command=Clear_Filter)
     button_order    = tk.Button(rootwindow,
-                        text = f"{'^' if order else 'v'}", command=Change_Sort_Order)
+                        text = f"{'^' if order else 'v'}", 
+                        command=Change_Sort_Order)
 
     button_generate.grid(column=7, row=2, sticky=tk.E+tk.W, padx=PX)
     button_view.grid(column=7, row=3, sticky=tk.E+tk.W, padx=PX)
@@ -927,7 +954,8 @@ if __name__ == '__main__':
     button_viewsum.grid(column=7, row=6, sticky=tk.E+tk.W, padx=PX)
     button_savecopy.grid(column=7, row=7, sticky=tk.E+tk.W, padx=PX)
 
-    label_associatedfile.grid(column=3, row=15, columns=4, sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
+    label_associatedfile.grid(column=3, row=15, columns=4, 
+                            sticky=tk.N+tk.W+tk.E+tk.S, padx=PX, pady=PY)
     label_sortby.grid(column=7, row=12, sticky=tk.W, padx=PX)
     pick_order.grid(column=7, row=13, sticky=tk.W, padx=PX)
     pick_order.current(0)
@@ -961,7 +989,8 @@ if __name__ == '__main__':
     # input_filter.bind('<KeyPress>', updateView)
     input_filter.bind('<KeyRelease>', updateView)
     # input_datetime.bind('<Triple-Button-1>', enterDate)
-    input_time.bind('<Triple-Button-1>', lambda e:timevalue.set(enterTime()))
+    input_time.bind('<Triple-Button-1>', 
+                    lambda e:timevalue.set(enterTime()))
     # input_filter.bind('<Escape>', Clear_filter)
     # pick_order.bind("<FocusIn>", updateView)
     pick_order.bind("<<ComboboxSelected>>", updateView)
@@ -977,7 +1006,7 @@ if __name__ == '__main__':
     #         'dummy-institute', 
     #         'mock-dept',
     #         './cas-copy.xlsx',
-    #         './cas-copy.xlsx', # This field value will be modified in Upload_Report() function, so we need two of these
+    #         './cas-copy.xlsx', 
     #         datetime.now()
     #     ]
     #     Upload_Report(testinp)
