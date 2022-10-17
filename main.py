@@ -160,7 +160,6 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     print(f'{codednames=}')
     rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, allquestions , rawscores, survey_name)
-    raise ValueError
     rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, codednames)
     # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')
