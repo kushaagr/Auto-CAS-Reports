@@ -14,10 +14,10 @@ def clean_up(dir):
         print("No such directory exists: %s" % dir)
 
 
-def create_dir(dir) -> str:
+def create_dir(folder_path) -> str:
     parentPath = '.'
-    # path = os.path.join(parentPath, dir)
-    path = dir
+    # path = os.path.join(parentPath, folder_path)
+    path = folder_path
     try:
         os.mkdir(path)
     except FileExistsError:
@@ -27,6 +27,18 @@ def create_dir(dir) -> str:
     finally:
         return path
 
+
+def create_safe_dir(folder_path) -> str:
+    parentPath = '.'
+    path = folder_path
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+    except FileNotFoundError:
+        print(FileNotFoundError)
+    finally:
+        return path
 
 def create_report_folder(filename) -> str:
     fname = filename.split('.')[0]

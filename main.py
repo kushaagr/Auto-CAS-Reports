@@ -10,6 +10,8 @@ import openpyxl
 import sqlite3
 import pathlib
 import shutil
+import logging
+import traceback
 import tkinter as tk
 from pprint import pprint
 from datetime import datetime
@@ -34,6 +36,15 @@ MIXED       = "MIXED"
 COMBINED    = "COMBINED"
 
 
+def setupLogging(file: str, enc: str = 'ascii', level=logging.WARNING):
+    """
+    https://docs.python.org/3/howto/logging.html
+    https://docs.python.org/3/library/codecs.html#module-codecs
+    """
+    dutil.create_safe_dir(config.LOGDIR)
+    logging.basicConfig(filename=file, #encoding=enc, errors='xmlcharrefreplace',
+        level=level, format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%d/%m/%Y %I:%M:%S %p')
 
 
 def enableButtons(a=None):
@@ -149,6 +160,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     # codednames = rutil.generate_codenames_list(studata, pick_department.get())
     print(f'{codednames=}')
     rutil.Upload_Summary(reportsdir, tscdata, studata, codednames, allquestions , rawscores, survey_name)
+    raise ValueError
     rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, codednames)
     # rutil.Upload_All_Reports(reportsdir, tscdata, studata, graphs, survey_id, pick_department.get())
     # rootwindow.config(cursor='')
@@ -205,6 +217,7 @@ def Generate_Action():
             busyframe.grab_release()
             rootwindow.deiconify()
             busyframe.destroy()
+            logging.error(traceback.format_exc())
             print("ERRORRRR: ", e)
             messagebox.showerror("Error", "Unable to generate reports.")
             raise e
@@ -706,6 +719,8 @@ if __name__ == '__main__':
     DONE:   TODO: Code incomplete functions. ie. View_Reports and Delete_Reports
  
     """
+
+    setupLogging(file=config.LOGFILE, enc='utf-8')
 
     # SQL interface
     if not os.path.exists(config.DBLOC):
