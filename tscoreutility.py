@@ -202,6 +202,6 @@ if __name__ == '__main__':
     FILE = '1-record-cas-sheet.xlsx'
     data = Parse_Excel_To_List(FILE)
     # pprint(data)
-    tscdata, studata = Tscores_And_Students_ImpData(data)
+    tscdata, studata, allquestions = Tscores_And_Students_ImpData(data)
     pprint(studata)
     pprint(tscdata)
