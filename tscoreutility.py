@@ -103,6 +103,7 @@ def Tscores_And_Students_ImpData(RawData):
 
     Student_Imp_Data = []
     AllQuestions = []
+    Raw_Scores = [['AN','DP','SI','SA','SE','IP','FP','AP','CP']]
     for i in range(0,Total_rows):
         student = []                                #Storing Students data
         OneRowQuestions = []                        # Storing rows questions
@@ -124,6 +125,7 @@ def Tscores_And_Students_ImpData(RawData):
             ...
         """
         temp = []
+        temp_Raw_Scores = []
         count = 1
         j = 13
         AN = DP = SI = SA = SE = IP = FP = AP = CP = 0
@@ -150,7 +152,18 @@ def Tscores_And_Students_ImpData(RawData):
         temp.append(T_Scores("CP", CP))
         T_Scores_Of_All_Students.append(temp)
 
-    return T_Scores_Of_All_Students, Student_Imp_Data, AllQuestions
+        temp_Raw_Scores.append(AN)
+        temp_Raw_Scores.append(DP)
+        temp_Raw_Scores.append(SI)
+        temp_Raw_Scores.append(SA)
+        temp_Raw_Scores.append(SE)
+        temp_Raw_Scores.append(IP)
+        temp_Raw_Scores.append(FP)
+        temp_Raw_Scores.append(AP)
+        temp_Raw_Scores.append(CP)
+        Raw_Scores.append(temp_Raw_Scores)
+
+    return T_Scores_Of_All_Students, Student_Imp_Data, AllQuestions, Raw_Scores
 
 
 def Graph_Of_Tscores(Y_Axis_tscore, Student_Data, i, directory_path):
