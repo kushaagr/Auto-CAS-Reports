@@ -297,11 +297,17 @@ def Create_All_Reports(dirpath: str, tscoreslist: list, data: list,
                 pdfile.image(f'{__GRAPHS_DIR}/{graphs[stu]}', 18, 128, h=120)
             # Page 5
             elif i == 5:
+                BREAK_POINT = 220 #245 #165
+                # Y_START     = 25 
+                Y_START     = 35
+                LINK_Y_POS  = BREAK_POINT + 40
+                LINK_X_POS  = 45
+
                 pdfile.set_margins(20, 0, 20)
-                pdfile.set_font_size(__DEF_FSIZE+5)
-                # pdfile.set_font_size(__DEF_FSIZE+3)
+                # pdfile.set_font_size(__DEF_FSIZE+5)
+                pdfile.set_font_size(__DEF_FSIZE+3)
                 # pdfile.set_font_size(__DEF_FSIZE+1)
-                pdfile.set_y(35)
+                pdfile.set_y(Y_START)
                 # for ii, keys in enumerate(problemareas[1:]):
                 for ii, keys in enumerate(problemareas):
                     for j, recommend in enumerate(reco.crpair[keys]):
@@ -311,14 +317,17 @@ def Create_All_Reports(dirpath: str, tscoreslist: list, data: list,
                         # pdfile.write(txt="SAMPLE TEXT SAMPLE TEXT SAMPLETEAKJLDSFLKAJDSF; JADLFKJALKS;JFL;AKJDFLKAJ;FKLAJDSFKL;JADLSF")
 
                         # pdfile.set_x(20)
-                        if (pdfile.get_y() > 165):
-                            pdfile.ln(210)
-                            pdfile.set_x(40)
+                        # if (pdfile.get_y() > 165):
+                        if (pdfile.get_y() > BREAK_POINT):
+                            # pdfile.ln(210)
+                            # pdfile.set_x(40)
                             # pdfile.cell(70, 20, "sample", border=1)
-                            pdfile.link(40, 210, 70, 20, ACROCARE_EMAIL)
+                            
+                            # pdfile.link(40, 210, 70, 20, ACROCARE_EMAIL)
+                            pdfile.link(LINK_X_POS, LINK_Y_POS, 70, 15, ACROCARE_EMAIL)
                             pdfile.add_page()
                             pdfile.image(f'{__IMGDIR}/{TEMPLATE_WITH_CONTACT}', 0, 0, w=__PG_WIDTH)
-                            pdfile.set_y(35)
+                            pdfile.set_y(Y_START)
                         pdfile.set_font(style="B")
                         # pdfile.write(txt="\n" + advice)
                         pdfile.write(txt="\n~ ") 
@@ -342,10 +351,12 @@ def Create_All_Reports(dirpath: str, tscoreslist: list, data: list,
                     f"professional help{' immediately' if len(problemareas) > 0 else ''}.")
                 pdfile.set_font(style="")
                 
-                pdfile.ln(210)
-                pdfile.set_x(40)
+                # pdfile.ln(210)
+                # pdfile.set_x(40)
                 # pdfile.cell(70, 20, "sample", border=1)
-                pdfile.link(40, 210, 70, 20, ACROCARE_EMAIL)
+
+                # pdfile.link(40, 210, 70, 20, ACROCARE_EMAIL)
+                pdfile.link(LINK_X_POS, LINK_Y_POS, 70, 15, ACROCARE_EMAIL)
                 pdfile.set_font_size(__DEF_FSIZE)
 
 
