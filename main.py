@@ -9,7 +9,7 @@ import subprocess
 import sqlite3
 import pathlib
 import shutil
-import logging
+# import logging
 import traceback
 import tkinter as tk
 from datetime import datetime
@@ -36,7 +36,7 @@ MIXED       = "MIXED"
 COMBINED    = "COMBINED"
 
 
-def setup_logging(file: str, enc: str = 'ascii', level=logging.WARNING):
+def setup_logging(file: str, enc: str = 'ascii'):#, level=logging.WARNING):
     """
     https://docs.python.org/3/howto/logging.html
     https://docs.python.org/3/library/codecs.html#module-codecs
@@ -45,6 +45,31 @@ def setup_logging(file: str, enc: str = 'ascii', level=logging.WARNING):
     logging.basicConfig(filename=file, #encoding=enc, errors='xmlcharrefreplace',
         level=level, format='%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%d/%m/%Y %I:%M:%S %p')
+
+
+def log_error(msg: str, *msgs: str):
+    dutil.create_safe_dir(config.LOGDIR)
+    LOGEXT  = r".log.txt"
+    LOGEXT  = r".log"
+    filename = pathlib.Path(datetime.now().strftime("%Y%m%d") + LOGEXT)
+    # Check if file with today's date exists
+    logfile = config.LOGDIR / filename
+    # If it does not, create it.
+    if not logfile.exists():
+        logfile.touch()
+    # open file in append mode
+    with logfile.open(mode='a', encoding='utf-8', errors='xmlcharrefreplace') as handler:
+        # print msg to the file-handler
+        # print(datetime.now().strftime('%d/%m/%Y %I:%M:%S %p - '), 
+        #     file=handler, end='')
+        handler.write(datetime.now().strftime('%d/%m/%Y %I:%M:%S %p'))
+        handler.write(' - ERROR - ')
+        # handler.write(msg + '\n')
+        print(msg, file=handler, end='\n')
+        for m in msgs:
+            # handler.write(m + '\n')
+            print(m, file=handler, end='\n')
+
 
 
 def enableButtons(a=None):
@@ -221,7 +246,10 @@ def Generate_Action():
             busyframe.grab_release()
             rootwindow.deiconify()
             busyframe.destroy()
-            logging.error(traceback.format_exc())
+            # logging.error(traceback.format_exc())
+            # log_error(traceback.format_exc())
+            # log_error(str(e))
+            log_error(e, traceback.format_exc())
             print("ERRORRRR: ", e)
             messagebox.showerror("Error", "Unable to generate reports.")
             raise e
@@ -736,7 +764,7 @@ if __name__ == '__main__':
  
     """
 
-    setup_logging(file=config.LOGFILE, enc='utf-8')
+    # setup_logging(file=config.LOGFILE, enc='utf-8')
 
     # SQL interface
     if not os.path.exists(config.DBLOC):
