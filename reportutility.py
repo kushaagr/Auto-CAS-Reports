@@ -237,14 +237,17 @@ def Create_All_Reports(dirpath: str, tscoreslist: list, data: list,
         # problemareas  = ['Anxiety','Depression','Suicidal Ideation','Interpersonalproblems']
         tscores         = ['Score'] + tscoreslist[gi]
         top4tscores     = heapq.nlargest(4, tscoreslist[gi])
+        maxtscore       = top4tscores[0]
         top4count       = coll.Counter(top4tscores)
         problemareas    = []
         for j, t in enumerate(tscores[1:], start=0):
-            if top4count.get(t, 0) > 0 and t >= 65:
+            # if top4count.get(t, 0) > 0 and t >= 65:
+            if top4count.get(t, 0) > 0 and t >= 60:
                 top4count[t] -= 1
-                problemareas.append(reco.CATEGORIES[1:][j])                                    
-            elif (int(t) >= 70):
-                problemareas.append(reco.CATEGORIES[1:][j])
+                problemareas.append(reco.CATEGORIES[1:][j])       
+
+            # elif (int(t) >= 70):
+            #     problemareas.append(reco.CATEGORIES[1:][j])
 
         # name = data[gi][0]
         # print("name, codename = ", name, name_codename_map[name])
@@ -343,12 +346,35 @@ def Create_All_Reports(dirpath: str, tscoreslist: list, data: list,
                         if debug_setting:
                             print(advice)
                             print(pdfile.get_y())
+                # note = "Do not hesitate to connect with counselor to seek " +
+                #     f"professional help{' immediately' if len(problemareas) > 0 else ''}."
+                # if maxtscore > 65:
+                #     note = ''
+                # elif maxtscore >= 60:
+                # if maxtscore >= 60:
+                #     note = (
+                #         "Do not hesitate to connect with counselor to seek " +
+                #         "professional help " + 
+                #         f"{'immediately' if maxtscore > 65 else 'if needed'}.")
+                # else:
+                #     note = (
+                #         "We are happy to inform you that there are no" + 
+                #         "major issues found in your assessment report." + 
+                #         "You can contact Acro Care as and when needed.")
+
+                note = (
+                    "Do not hesitate to connect with counselor to seek " +
+                    "professional help " + 
+                    f"{'immediately' if maxtscore > 65 else 'if needed'}."
+                    ) if maxtscore >= 60 else (
+                    "We are happy to inform you that there are no" + 
+                    "major issues found in your assessment report." + 
+                    "You can contact Acro Care as and when needed."
+                    )
 
                 pdfile.set_font(style="B")
                 pdfile.ln(10)
-                pdfile.write(
-                    txt="Do not hesitate to connect with counselor to seek " +
-                    f"professional help{' immediately' if len(problemareas) > 0 else ''}.")
+                pdfile.write( txt=note )
                 pdfile.set_font(style="")
                 
                 # pdfile.ln(210)
