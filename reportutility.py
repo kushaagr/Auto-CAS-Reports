@@ -368,8 +368,8 @@ def Create_All_Reports(dirpath: str, tscoreslist: list, data: list,
                     f"{'immediately' if maxtscore > 65 else 'if needed'}."
                     ) if maxtscore >= 60 else (
                     "We are happy to inform you that there are no" + 
-                    "major issues found in your assessment report." + 
-                    "You can contact Acro Care as and when needed."
+                    " major issues found in your assessment report." + 
+                    " You can contact Acro Care as and when needed."
                     )
 
                 pdfile.set_font(style="B")
