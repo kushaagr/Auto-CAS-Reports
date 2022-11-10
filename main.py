@@ -473,8 +473,8 @@ def View_Reports():
             Fetch details for selected report from tblSurveyReports using pk from tblSurveySheets
             Append details to student details treeview
     """
-    # TODO: Add a button to View Summary sheet
-    # TODO: Add a button to Download Summary sheet
+    # DONE: TODO: Add a button to View Summary sheet
+    # REJECTED PROPOSAL: TODO: Add a button to Download Summary sheet
 
     TIP = "Use mousewheel to scroll vertically, and use MouseWheel with SHIFT key to scoll horizontally." + \
         "\n" + "Hold CTRL and Left-click to select items.\n" +\
@@ -487,29 +487,81 @@ def View_Reports():
         'Email', 'Mobile number', 'Age', 'Gender', 'Department', 
         'Year', 'FILE')
     SHOW_COLS = tuple(range(len(FIELD_ID) - 1))
-
-    for treeItemId in tree.selection():
-        item = tree.item(treeItemId)['values']
-        surveyid = item[-1]
+    
+    def openFile(treeobj):
+        folder_name = pathlib.Path(item[-2]).stem
+        # subprocess.Popen(
+        # 'start ./data/reports/' + folder_name + '/' + tree_studentsinfo.item(
+        #     tree_studentsinfo.selection()[0]
+        # )['values'][-1], shell=True )
+        print(folder_name, treeobj.focus(), treeobj.selection())
+        for itemId in treeobj.selection():
+            subprocess.run(
+            # ['start', './data/reports/' + folder_name + '/' + tree_studentsinfo.item(
+            [ 'start', 
+                str(pathlib.Path(config.REPORTSFOL) / folder_name / treeobj.item(
+                    itemId
+                )['values'][-1]) 
+            ], shell=True)
+    
+    def updateStudentView(treeobj, surveyid, filtertxt=""):
         con1 = con or sqlite3.connect(config.DB)
         cur = con1.cursor()
         cur.execute("""SELECT file FROM tblSurveySheets WHERE id = ?""", 
             (surveyid,))
         reportsdir = pathlib.Path( cur.fetchone()[0] ).stem
+        filtertxt = '%'+filtertxt+'%'
         cur.execute("""SELECT student_codename, tot_problem_areas, 
             student_name, email, mobile_number, age, gender, stream, 
-            year, report_file FROM tblSurveyReports WHERE survey_id = ?""", 
-            (surveyid,))
+            year, report_file FROM tblSurveyReports WHERE survey_id = ?
+            and (student_codename LIKE ? or tot_problem_areas LIKE ?  
+                or student_name LIKE ? or stream LIKE ? COLLATE NOCASE)
+            -- student_name LIKE ? or student_codename LIKE ? or
+            -- institute LIKE ? or stream LIKE ? COLLATE NOCASE """ , 
+            (surveyid,) + (filtertxt,)*4 + ())
         # cur.execute("""SELECT student_name
             # FROM tblSurveyReports WHERE survey_id = ?""", (surveyid,))
         rows = cur.fetchall()
         print("fetched rows:", rows)
 
+        # treeobj.grid(column=0, row=0, sticky=tk.N+tk.W+tk.E+tk.S)
+        # treeobj.pack(side='left')
+        # button_downselected.pack(side='right', anchor='n')
+        # treeobj.column('email', width=400)
+        treeobj.pack(expand=1, fill='both')
+        label_info.pack(side='left', anchor='w', ipadx=PX)
+        input_filefilter.pack(side='right', anchor='n', pady=PY, padx=PX)
+        label_filefilter.pack(side='right', anchor='n', pady=PY, padx=PX)
+        button_openselected.pack(side='top', anchor='s', pady=PY, padx=PX)
+        button_downselected.pack(side='top', anchor='s', pady=PY, padx=PX)
+        
+        for item in treeobj.get_children():
+            treeobj.delete(item)
+
+        for row in rows:
+            print("STUDENT INFO", row)
+            PA_INDEX = 1
+            # total_pa = len(row[PA_INDEX].split(',')) if row[PA_INDEX].strip() != '' else 0
+            # print("PA DATA ", row[2].split(','), len(row[2].split(',')))
+            # tree.insert("", tk.END, values=[str(i) for i in row])
+            # treeobj.insert("", tk.END, values=[*row])
+            # treeobj.insert("", tk.END, values=tuple(row))
+            # treeobj.insert("", tk.END, values=(*row[:PA_INDEX], total_pa, *row[PA_INDEX+1:]))
+            treeobj.insert("", tk.END, values=row)
+
+    for treeItemId in tree.selection():
+        item = tree.item(treeItemId)['values']
+        surveyid = item[-1]
+
         # reportsframe = tk.Toplevel()
-        BUTTON_WIDTH = 25
         reportsframe = tk.Toplevel(rootwindow)
+        BUTTON_WIDTH = 25
         tree_studentsinfo = ttk.Treeview(reportsframe, columns=FIELD_ID,
                                 show='headings', displaycolumns=SHOW_COLS)
+        label_info = tk.Label(reportsframe, text=TIP, justify=tk.LEFT, 
+                            anchor='w')
+        label_filefilter = tk.Label(reportsframe, text="Filter")
+        input_filefilter = tk.Entry(reportsframe)
         button_downselected = tk.Button(reportsframe, anchor='center', 
             text="Download selected reports", width=BUTTON_WIDTH, 
             command=lambda: Download_Selected_Reports(tree_studentsinfo, 
@@ -519,8 +571,6 @@ def View_Reports():
             text="Open selected reports", width=BUTTON_WIDTH, 
             command=lambda: openFile(tree_studentsinfo)
             )
-        label_info = tk.Label(reportsframe, text=TIP, justify=tk.LEFT, 
-                            anchor='w')
         
         for fid, ftitle in zip(FIELD_ID, FIELDS_NAME):
             # tree_studentsinfo.heading(fid, text=ftitle, anchor='center')
@@ -531,50 +581,18 @@ def View_Reports():
         for fid in FIELD_ID[-5:]:
             tree_studentsinfo.column(fid, stretch=False, width=100)
 
-        # tree_studentsinfo.grid(column=0, row=0, sticky=tk.N+tk.W+tk.E+tk.S)
-        # tree_studentsinfo.pack(side='left')
-        # button_downselected.pack(side='right', anchor='n')
-        # tree_studentsinfo.column('email', width=400)
-        tree_studentsinfo.pack(expand=1, fill='both')
-        label_info.pack(side='left', anchor='w', ipadx=PX)
-        button_openselected.pack(side='top', anchor='e', pady=PY, padx=PX)
-        button_downselected.pack(side='top', anchor='e', pady=PY, padx=PX)
-
-
-        for row in rows:
-            print("STUDENT INFO", row)
-            PA_INDEX = 1
-            # total_pa = len(row[PA_INDEX].split(',')) if row[PA_INDEX].strip() != '' else 0
-            # print("PA DATA ", row[2].split(','), len(row[2].split(',')))
-            # tree.insert("", tk.END, values=[str(i) for i in row])
-            # tree_studentsinfo.insert("", tk.END, values=[*row])
-            # tree_studentsinfo.insert("", tk.END, values=tuple(row))
-            # tree_studentsinfo.insert("", tk.END, values=(*row[:PA_INDEX], total_pa, *row[PA_INDEX+1:]))
-            tree_studentsinfo.insert("", tk.END, values=row)
+        updateStudentView(tree_studentsinfo, surveyid)
 
         # tree_studentsinfo.bind('<Double-1>', lambda e: subprocess.run(
         #     'start', './data/reports/' + foldername + tree_studentsinfo.item(
         #         tree_studentsinfo.selection()[0]
         #     )['values'][-1] ))
-        def openFile(treeobj):
-            folder_name = pathlib.Path(item[-2]).stem
-            # subprocess.Popen(
-            # 'start ./data/reports/' + folder_name + '/' + tree_studentsinfo.item(
-            #     tree_studentsinfo.selection()[0]
-            # )['values'][-1], shell=True )
-            print(folder_name, treeobj.focus(), treeobj.selection())
-            for itemId in treeobj.selection():
-                subprocess.run(
-                # ['start', './data/reports/' + folder_name + '/' + tree_studentsinfo.item(
-                [ 'start', 
-                    str(pathlib.Path(config.REPORTSFOL) / folder_name / tree_studentsinfo.item(
-                        itemId
-                    )['values'][-1]) 
-                ], shell=True)
                         # tree_studentsinfo.focus()
 
         # tree_studentsinfo.bind('<Double-1>', lambda e: openFile(tree_studentsinfo))
         tree_studentsinfo.bind('<<TreeviewOpen>>', lambda e: openFile(tree_studentsinfo))
+        input_filefilter.bind('<KeyRelease>', lambda e: updateStudentView(
+            tree_studentsinfo, surveyid, filtertxt=input_filefilter.get()))
 
 
 def Delete_Reports():
