@@ -195,18 +195,20 @@ def Plot_Graphs(TScores, Student_Data):
 
     # Instead of list, a mapping of student-name to graph-image-path is more convenient and secure.
     # List_Of_Graphs = []
-    Graphs = {}
-    # folder = create_dir('temp')
     folder = create_dir(config.TEMPDIR)
+    Graphs = {}
     for i in range(1,Total_rows):
         Y_Axis_tscore = []
         for j in range(0,Total_cols):
             Y_Axis_tscore.append(TScores[i][j])
         # List_Of_Graphs.append(Graph_Of_Tscores(Y_Axis_tscore,Student_Data,i))  #For Making graph of row student
+        
         Graphs[Student_Data[i][0]] = Graph_Of_Tscores(Y_Axis_tscore,Student_Data,i,folder)
     
     # return List_Of_Graphs
+    
     return Graphs
+    # return {'abcd': 'sample-plot.png'}
 
 
 if __name__ == '__main__':
@@ -215,6 +217,7 @@ if __name__ == '__main__':
     FILE = '1-record-cas-sheet.xlsx'
     data = Parse_Excel_To_List(FILE)
     # pprint(data)
-    tscdata, studata, allquestions = Tscores_And_Students_ImpData(data)
+    tscdata, studata, allquestions, rawscores = Tscores_And_Students_ImpData(data)
     pprint(studata)
     pprint(tscdata)
+    # pprint(rawscores)

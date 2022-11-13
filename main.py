@@ -10,6 +10,7 @@ import sqlite3
 import pathlib
 import shutil
 # import logging
+import threading
 import traceback
 import tkinter as tk
 from datetime import datetime
@@ -172,8 +173,11 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
         data = tsc.Parse_Csv_To_List(fname)
     else:
         # If given unrecognized file format
-        return
+        print("unrecognized file")
+        return 0
     tscdata, studata, allquestions, rawscores = tsc.Tscores_And_Students_ImpData(data)
+    print("INFO: parsed data")
+    
     if (debug_setting):
         oldtscdata = tscdata[:]
         del tscdata
@@ -181,6 +185,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
         tscdata.append([71] * len(tscdata[0]))
     # pprint(studata) 
     # graphs = {'abcd': 'abcd1.png', 'nmn': 'nmn2.png', 'vxz': 'vxz3.png', 'efg': 'efg4.png', 'fgh': 'fgh5.png', 'hui': 'hui6.png', 'tkiof': 'tkiof7.png'}
+    
     graphs = tsc.Plot_Graphs(tscdata, studata)
     # print(graphs)
         
@@ -193,6 +198,7 @@ def Perform_File_Operations(data_sheet: str, survey_id: int, survey_name: str):
     rutil.Create_All_Reports(reportsdir, tscdata, studata, graphs, 
                         survey_id, codednames)
     # rootwindow.config(cursor='')
+    return 1
 
 
 def center_window(window, width=300, height=200):
@@ -219,45 +225,63 @@ def Create_Busy_Frame(parentwindow):
     pass
 
 
-def Generate_Action():
+def Threaded_Generate_Action():
+    print("thread crafting")
+    treeobj = tree
+    selected = [_ for _ in tree.selection()]
+    try:
+        t = threading.Thread(target=Generate_Action, args=[treeobj, selected])
+        t.start()
+    except Exception as e:
+        print(traceback.format_exc())
+        log_error(e, traceback.format_exc())
+
+
+def Generate_Action(tree: tk.ttk.Treeview, treeselection: list):
+    
     busyframe = Create_Busy_Frame(rootwindow)
     busyframe.update()
     busyframe.grab_set()
     rootwindow.withdraw()
-    # if True:
-    for treeItemId in tree.selection():
-        # print( treedata := tree.item(tree.focus())['values'] )
-        print( treedata := tree.item(treeItemId)['values'] )
-        item_id = int(treedata[-1])
-        survey_name = treedata[0]
-        # print(item_id)
-        con1 = con or sqlite3.connect(config.DB)
+
+    # SQLite objects created in a thread can only be used in that same thread
+    try:
+        con1 = sqlite3.connect(config.DB)
         cur = con1.cursor()
-        fname = cur.execute("""SELECT file FROM tblSurveySheets WHERE id=?""", 
-                            (str(item_id),) ).fetchone()[0]
-                            # (str((item_id).fetchone()[0]), ))
-        # con.close()
-        # fname = "./data/raw/" + fname
-        print(fname)
-        print()
-        try:
-            Perform_File_Operations(fname, item_id, survey_name)
-        except Exception as e:
-            busyframe.grab_release()
-            rootwindow.deiconify()
-            busyframe.destroy()
-            # logging.error(traceback.format_exc())
-            # log_error(traceback.format_exc())
-            # log_error(str(e))
-            log_error(e, traceback.format_exc())
-            print("ERRORRRR: ", e)
-            messagebox.showerror("Error", "Unable to generate reports.")
-            raise e
-    busyframe.grab_release()
-    rootwindow.deiconify()
-    busyframe.destroy()
-    messagebox.showinfo("Done", "Reports generated!")
-    disableButtons()
+        # print("Slected items length = ", len(tree.selection()))
+        print("Slected items length = ", len(treeselection()))
+        print("Type of tk.tree", type(tree))
+        for treeItemId in treeselection:
+            # print( treedata := tree.item(tree.focus())['values'] )
+            print( treedata := tree.item(treeItemId)['values'] )
+            item_id = int(treedata[-1])
+            survey_name = treedata[0]
+            # print(item_id)
+            fname = cur.execute("""SELECT file FROM tblSurveySheets WHERE id=?""", 
+                                (str(item_id),) ).fetchone()[0]
+                                # (str((item_id).fetchone()[0]), ))
+            # con.close()
+            # fname = "./data/raw/" + fname
+            print(fname)
+            print()
+            # try:
+            print("Success? \t",
+                Perform_File_Operations(fname, item_id, survey_name))
+    except Exception as e:
+        # logging.error(traceback.format_exc())
+        # log_error(traceback.format_exc())
+        # log_error(str(e))
+        log_error(e, traceback.format_exc())
+        print("ERRORRRR: ", e)
+        messagebox.showerror("Error", "Unable to generate reports.")
+        raise e
+    finally:
+        con1.close()
+        busyframe.grab_release()
+        rootwindow.deiconify()
+        busyframe.destroy()
+        messagebox.showinfo("Done", "Reports generated!")
+        disableButtons()
 
 
 def Copy_All_Reports():
@@ -524,16 +548,6 @@ def View_Reports():
         rows = cur.fetchall()
         print("fetched rows:", rows)
 
-        # treeobj.grid(column=0, row=0, sticky=tk.N+tk.W+tk.E+tk.S)
-        # treeobj.pack(side='left')
-        # button_downselected.pack(side='right', anchor='n')
-        # treeobj.column('email', width=400)
-        treeobj.pack(expand=1, fill='both')
-        label_info.pack(side='left', anchor='w', ipadx=PX)
-        input_filefilter.pack(side='right', anchor='n', pady=PY, padx=PX)
-        label_filefilter.pack(side='right', anchor='n', pady=PY, padx=PX)
-        button_openselected.pack(side='top', anchor='s', pady=PY, padx=PX)
-        button_downselected.pack(side='top', anchor='s', pady=PY, padx=PX)
         
         for item in treeobj.get_children():
             treeobj.delete(item)
@@ -560,8 +574,9 @@ def View_Reports():
                                 show='headings', displaycolumns=SHOW_COLS)
         label_info = tk.Label(reportsframe, text=TIP, justify=tk.LEFT, 
                             anchor='w')
-        label_filefilter = tk.Label(reportsframe, text="Filter")
-        input_filefilter = tk.Entry(reportsframe)
+        frame_filefilter = tk.Frame(reportsframe)
+        label_filefilter = tk.Label(frame_filefilter, text="Filter")
+        input_filefilter = tk.Entry(frame_filefilter)
         button_downselected = tk.Button(reportsframe, anchor='center', 
             text="Download selected reports", width=BUTTON_WIDTH, 
             command=lambda: Download_Selected_Reports(tree_studentsinfo, 
@@ -580,6 +595,18 @@ def View_Reports():
             tree_studentsinfo.column(fid, stretch=False, width=150)
         for fid in FIELD_ID[-5:]:
             tree_studentsinfo.column(fid, stretch=False, width=100)
+
+        # tree_studentsinfo.grid(column=0, row=0, sticky=tk.N+tk.W+tk.E+tk.S)
+        # tree_studentsinfo.pack(side='left')
+        # button_downselected.pack(side='right', anchor='n')
+        # tree_studentsinfo.column('email', width=400)
+        tree_studentsinfo.pack(expand=1, fill='both')
+        label_info.pack(side='left', anchor='w', ipadx=PX)
+        input_filefilter.pack(side='right', anchor='n')
+        label_filefilter.pack(side='right', anchor='n')
+        frame_filefilter.pack(side='top', anchor='e', pady=PY, padx=PX)
+        button_openselected.pack(side='top', anchor='e', pady=PY, padx=PX)
+        button_downselected.pack(side='top', anchor='e', pady=PY, padx=PX)
 
         updateStudentView(tree_studentsinfo, surveyid)
 
@@ -971,7 +998,7 @@ if __name__ == '__main__':
 
     button_generate = tk.Button(rootwindow, 
                         text = 'GENERATE REPORTS',  state='disabled',
-                        command=Generate_Action)
+                        command=Threaded_Generate_Action)
     button_view     = tk.Button(rootwindow, 
                         text = 'VIEW REPORTS',      state='disabled',
                         command=View_Reports)
