@@ -213,7 +213,7 @@ def plot_problem_areas(pdfobj, col: list,
 
 
 def Create_All_Reports(dirpath: str, tscoreslist: list, data: list, 
-                        graphs: list, survey_id: int, codenames: list = None,
+                        graphs: dict, survey_id: int, codenames: list = None,
                         whichdepartment: str = None) -> str:
 
     con1 = sqlite3.connect(config.DB)
@@ -297,7 +297,8 @@ def Create_All_Reports(dirpath: str, tscoreslist: list, data: list,
                 #     'Family Problems (FP)', 'Academic Problems (AP)','Career Problems (CP)']
                 
                 plot_tscores(pdfile, reco.CATEGORIES, tscores, problemareas)
-                pdfile.image(f'{os.path.join(__GRAPHS_DIR, graphs[stu])}', 18, 128, h=120)
+                # pdfile.image(f'{os.path.join(__GRAPHS_DIR, graphs[stu])}', 18, 128, h=120)
+                pdfile.image(f'{os.path.join(__GRAPHS_DIR, graphs[data[gi][0]])}', 18, 128, h=120)
             # Page 5
             elif i == 5:
                 BREAK_POINT = 220 #245 #165

@@ -531,9 +531,6 @@ def View_Reports():
     def updateStudentView(treeobj, surveyid, filtertxt=""):
         con1 = con or sqlite3.connect(config.DB)
         cur = con1.cursor()
-        cur.execute("""SELECT file FROM tblSurveySheets WHERE id = ?""", 
-            (surveyid,))
-        reportsdir = pathlib.Path( cur.fetchone()[0] ).stem
         filtertxt = '%'+filtertxt+'%'
         cur.execute("""SELECT student_codename, tot_problem_areas, 
             student_name, email, mobile_number, age, gender, stream, 
@@ -566,6 +563,13 @@ def View_Reports():
     for treeItemId in tree.selection():
         item = tree.item(treeItemId)['values']
         surveyid = item[-1]
+
+        con1 = con or sqlite3.connect(config.DB)
+        cur = con1.cursor()
+        cur.execute("""SELECT file FROM tblSurveySheets WHERE id = ?""", 
+            (surveyid,))
+        reportsdir = pathlib.Path( cur.fetchone()[0] ).stem
+
 
         # reportsframe = tk.Toplevel()
         reportsframe = tk.Toplevel(rootwindow)

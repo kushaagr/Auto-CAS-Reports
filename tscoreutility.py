@@ -190,6 +190,7 @@ def Graph_Of_Tscores(Y_Axis_tscore, Student_Data, i, directory_path):
 
 
 def Plot_Graphs(TScores, Student_Data):
+    """Returns a dictionary of Student-Name:Image-file pair"""
     Total_rows = len(TScores)      #Total no. of rows in Data
     Total_cols = len(TScores[0])   #Total no. of coloms in Data
 
