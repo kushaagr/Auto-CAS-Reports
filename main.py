@@ -249,7 +249,7 @@ def Generate_Action(tree: tk.ttk.Treeview, treeselection: list):
         con1 = sqlite3.connect(config.DB)
         cur = con1.cursor()
         # print("Slected items length = ", len(tree.selection()))
-        print("Slected items length = ", len(treeselection()))
+        print("Slected items length = ", len(treeselection))
         print("Type of tk.tree", type(tree))
         for treeItemId in treeselection:
             # print( treedata := tree.item(tree.focus())['values'] )
