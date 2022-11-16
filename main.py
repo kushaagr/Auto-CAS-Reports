@@ -13,6 +13,8 @@ import shutil
 import threading
 import traceback
 import tkinter as tk
+# import webbrowser
+
 from datetime import datetime
 from tkinter import ttk
 from tkinter import filedialog, messagebox
@@ -512,21 +514,34 @@ def View_Reports():
         'Year', 'FILE')
     SHOW_COLS = tuple(range(len(FIELD_ID) - 1))
     
-    def openFile(treeobj):
+    def openFile(treeobj, item: list):
         folder_name = pathlib.Path(item[-2]).stem
+
+        # print("execute subprocess to open pdf", "({})".format(folder_name))
         # subprocess.Popen(
         # 'start ./data/reports/' + folder_name + '/' + tree_studentsinfo.item(
         #     tree_studentsinfo.selection()[0]
         # )['values'][-1], shell=True )
         print(folder_name, treeobj.focus(), treeobj.selection())
         for itemId in treeobj.selection():
-            subprocess.run(
-            # ['start', './data/reports/' + folder_name + '/' + tree_studentsinfo.item(
-            [ 'start', 
-                str(pathlib.Path(config.REPORTSFOL) / folder_name / treeobj.item(
-                    itemId
-                )['values'][-1]) 
-            ], shell=True)
+            pdf_file = treeobj.item(itemId)['values'][-1]
+            # pdf_file = "generated-report-sample-1.pdf"
+
+            # pdf_path = '"{}"'.format(str(pathlib.Path(config.REPORTSFOL) / folder_name / pdf_file))
+
+            pdf_path = '{}'.format(str(pathlib.Path(config.REPORTSFOL) / folder_name / pdf_file))
+            # pdf_path = r"C:\Users\kusha\Documents\Acrocare project files\\" + pdf_file
+
+            # print("Path", '"{}"'.format(
+            #     str(pathlib.Path(config.REPORTSFOL) / folder_name / pdf_file)))
+            # subprocess.Popen('start "{}"'.format(
+            # subprocess.Popen('"{}"'.format(
+            #     str(pathlib.Path(config.REPORTSFOL) / folder_name / pdf_file)), 
+                # shell=True)
+            print(f"{pdf_path=}")
+            subprocess.Popen([pdf_path], shell=True)
+            # subprocess.run([pdf_path], shell=True)
+            # subprocess.call([pdf_path], shell=True)
     
     def updateStudentView(treeobj, surveyid, filtertxt=""):
         con1 = con or sqlite3.connect(config.DB)
@@ -559,6 +574,7 @@ def View_Reports():
             # treeobj.insert("", tk.END, values=tuple(row))
             # treeobj.insert("", tk.END, values=(*row[:PA_INDEX], total_pa, *row[PA_INDEX+1:]))
             treeobj.insert("", tk.END, values=row)
+        # treeobj.bind('<<TreeviewOpen>>', lambda e: openFile(treeobj))
 
     for treeItemId in tree.selection():
         item = tree.item(treeItemId)['values']
@@ -588,7 +604,7 @@ def View_Reports():
             )
         button_openselected = tk.Button(reportsframe, anchor='center', 
             text="Open selected reports", width=BUTTON_WIDTH, 
-            command=lambda: openFile(tree_studentsinfo)
+            command=lambda: openFile(tree_studentsinfo, item)
             )
         
         for fid, ftitle in zip(FIELD_ID, FIELDS_NAME):
@@ -620,8 +636,9 @@ def View_Reports():
         #     )['values'][-1] ))
                         # tree_studentsinfo.focus()
 
-        # tree_studentsinfo.bind('<Double-1>', lambda e: openFile(tree_studentsinfo))
-        tree_studentsinfo.bind('<<TreeviewOpen>>', lambda e: openFile(tree_studentsinfo))
+        tree_studentsinfo.bind('<<TreeviewOpen>>', lambda e: openFile(tree_studentsinfo, item))
+        # tree_studentsinfo.bind('<Double-1>', lambda e: openFile(tree_studentsinfo, item))
+        tree_studentsinfo.bind('<Button-1>', lambda e: print(tree_studentsinfo.item(tree_studentsinfo.focus())))
         input_filefilter.bind('<KeyRelease>', lambda e: updateStudentView(
             tree_studentsinfo, surveyid, filtertxt=input_filefilter.get()))
 
