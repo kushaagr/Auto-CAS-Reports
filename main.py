@@ -636,9 +636,9 @@ def View_Reports():
         #     )['values'][-1] ))
                         # tree_studentsinfo.focus()
 
-        tree_studentsinfo.bind('<<TreeviewOpen>>', lambda e: openFile(tree_studentsinfo, item))
-        # tree_studentsinfo.bind('<Double-1>', lambda e: openFile(tree_studentsinfo, item))
-        tree_studentsinfo.bind('<Button-1>', lambda e: print(tree_studentsinfo.item(tree_studentsinfo.focus())))
+        # tree_studentsinfo.bind('<<TreeviewOpen>>', lambda e: openFile(tree_studentsinfo, item))
+        tree_studentsinfo.bind('<Double-1>', lambda e: openFile(tree_studentsinfo, item))
+        # tree_studentsinfo.bind('<Button-1>', lambda e: print(tree_studentsinfo.item(tree_studentsinfo.focus())))
         input_filefilter.bind('<KeyRelease>', lambda e: updateStudentView(
             tree_studentsinfo, surveyid, filtertxt=input_filefilter.get()))
 
