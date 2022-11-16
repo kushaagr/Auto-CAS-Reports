@@ -22,7 +22,7 @@ InfoAfterFile=.\CREDITS.TXT
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputBaseFilename=report-maker-setup
+OutputBaseFilename=report-maker-setup-v{#MyAppVersion}
 SetupIconFile=.\images\icons8-project-setup-70.ico
 Compression=lzma
 SolidCompression=yes
