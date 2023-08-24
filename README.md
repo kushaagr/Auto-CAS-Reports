@@ -45,6 +45,11 @@ python main.py
 pyinstaller -i ./images/icons8-feather-60.ico -w --noconfirm --add-data "./images/;images" --add-data "./myfonts/;myfonts" main.py
 ```
 
+### Setup command (if innosetup's program file folder is in path)
+```
+iscc create-setup.iss
+```
+
 ## Application input
 
 * The data could be provided either in form of excel sheet (first sheet should contain the data) or csv.

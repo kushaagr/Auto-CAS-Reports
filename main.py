@@ -394,7 +394,7 @@ def Upload_Report(data: list):
         tblSurveySheets(survey_name, survey_time, institute, department, 
         ogfile_path, file, upload_time) VALUES(?,?,?,?,?,?,?)""", data)
         # tblSurveySheets()
-    rows = cur.fetchall()    
+    rows = cur.fetchall()
     print("rows: ", rows)
     con1.commit()
     # con.close()
@@ -812,7 +812,8 @@ def createFooter(parentwindow):
 
 if __name__ == '__main__':
     """
-    TODOs
+
+     TODOs 
     TODO: File path should look like "C/users/kusha/Docu...cas-copy.xlsx", also replace foward slash with backslash
     TODO: Add v-scrollbar to treeview
     TODO: Add auto-hide H-scrollbar to treeview

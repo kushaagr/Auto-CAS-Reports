@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 ; Update version number after update to application and before packaging in setup
-#define MyAppVersion "1.3.2"
+#define MyAppVersion "1.3.3"
 #define MyAppName "CAS pdf-report maker " + MyAppVersion
 
 #define MyAppPublisher "Acropolis FCA department"
